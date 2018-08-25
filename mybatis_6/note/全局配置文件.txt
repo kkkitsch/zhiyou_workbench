@@ -1,0 +1,154 @@
+
+<properties>标签表示可以引入外部资源文件
+
+<properties>标签中的属性：
+	resource：类路径下的资源文件
+	url:磁盘路径下或者网络路径下的资源文件
+	
+	
+	
+<setting name="mapUnderscoreToCamelCase" value="true"/>
+驼峰命名规则：从经典数据库列名 A_COLUMN 到经典 Java 属性名 aColumn 的类似映射
+
+	映射的使用：
+
+	数据库中字段名称和 实体类bean 属性值字段名称不一致：
+	
+		1、不配置结果集，不使用驼峰命名规则，这时，数据库在查询到数据之后，相同的字段名称和属性名称可以匹配成功，
+		       其他的就无法匹配 映射成的实体类当中，和表中字段名称不一致的bean属性值就为空
+		       
+		2、可以设定一个结果集，将数据库中的字段和bean中的字段对应起来即可匹配成功
+		
+		3、使用驼峰命名规则，那么在查询之后，mybatis就可以根据驼峰命名规则将数据库中字段名称
+		       映射成bean属性名称，比如：A_COLUMN---》aColumn，  abc_def---》abcDef
+	       
+	    4、在sql语句种使用别名，让别名来和bean中的属性名来保持一致 
+	
+	数据库中字段名称和 实体类bean 属性值字段名称一致，比如说，数据库字段名称为：last_name,实体类bean中属性名称为：last：
+	
+		1、不配置结果集，不使用驼峰命名规则，这时，数据库在查询到数据之后，相同的字段名称和属性名称可以匹配成功，
+		       其他的就无法匹配 映射成的实体类当中，和表中字段名称不一致的bean属性值就为空
+		       
+		2、可以设定一个结果集，将数据库中的字段和bean中的字段对应起来即可匹配成功
+		
+		3、使用驼峰命名规则，无法映射成功！
+		       原因：数据库查询之后，mybatis将数据库中字段名称 映射成bean属性名称，
+		       比如：A_COLUMN---》aColumn，  abc_def---》abcDef
+		       这时，数据库字段名称和实体类属性名称不一致，导致映射失败
+		       
+		       
+		       
+		       
+		       
+		       
+		       
+<package name="com.zhiyou.mybatis.bean" />
+	
+	使用类的别名，别名名称为bean包下，类的名称的小写
+	
+	实际上，别名不区分大小写，如果存在实体类为：Student,那么在配置包下的别名后，
+	使用类的别名时，别名可以为student,STUDENT,sTUdent......
+	
+	在可能存在别名命名冲突的情况下，可以在实体类中使用注解的方式，为可能存在冲突的别名重新设定
+	别名，比如：@Alias(value = "ABC")
+	
+	
+
+
+
+
+环境中的配置
+
+	default="development" : 默认使用的环境
+	<transactionManager type="JDBC" /> ： 使用的事务管理为JDBC，type指定的实际上是一个类，这个类使用了别名，别名为JDBC
+	
+	在 MyBatis 中有两种类型的事务管理器（也就是 type=”[JDBC|MANAGED]”）：
+
+    JDBC – 这个配置就是直接使用了 JDBC 的提交和回滚设置，它依赖于从数据源得到的连接来管理事务作用域。
+    MANAGED – 这个配置几乎没做什么。它从来不提交或回滚一个连接，而是让容器来管理事务的整个生命周期（比如 JEE 应用服务器的上下文）。
+            默认情况下它会关闭连接，然而一些容器并不希望这样，因此需要将 closeConnection 属性设置为 false 来阻止它默认的关闭行为。
+            
+	如果你正在使用 Spring + MyBatis，则没有必要配置事务管理器， 因为 Spring 模块会使用自带的管理器来覆盖前面的配置。
+
+	这两种事务管理器类型都不需要任何属性。它们不过是类型别名，换句话说，你可以使用 TransactionFactory 接口的实现类的完全限定名或类型别名代替它们。
+
+	org.apache.ibatis.session.Configuration类中定义的一些别名：
+		public Configuration() {
+	    typeAliasRegistry.registerAlias("JDBC", JdbcTransactionFactory.class);
+	    typeAliasRegistry.registerAlias("MANAGED", ManagedTransactionFactory.class);
+	
+	    typeAliasRegistry.registerAlias("JNDI", JndiDataSourceFactory.class);
+	    typeAliasRegistry.registerAlias("POOLED", PooledDataSourceFactory.class);
+	    typeAliasRegistry.registerAlias("UNPOOLED", UnpooledDataSourceFactory.class);
+	
+	    typeAliasRegistry.registerAlias("PERPETUAL", PerpetualCache.class);
+	    typeAliasRegistry.registerAlias("FIFO", FifoCache.class);
+	    typeAliasRegistry.registerAlias("LRU", LruCache.class);
+	    typeAliasRegistry.registerAlias("SOFT", SoftCache.class);
+	    typeAliasRegistry.registerAlias("WEAK", WeakCache.class);
+	
+	    typeAliasRegistry.registerAlias("DB_VENDOR", VendorDatabaseIdProvider.class);
+	
+	    typeAliasRegistry.registerAlias("XML", XMLLanguageDriver.class);
+	    typeAliasRegistry.registerAlias("RAW", RawLanguageDriver.class);
+	
+	    typeAliasRegistry.registerAlias("SLF4J", Slf4jImpl.class);
+	    typeAliasRegistry.registerAlias("COMMONS_LOGGING", JakartaCommonsLoggingImpl.class);
+	    typeAliasRegistry.registerAlias("LOG4J", Log4jImpl.class);
+	    typeAliasRegistry.registerAlias("LOG4J2", Log4j2Impl.class);
+	    typeAliasRegistry.registerAlias("JDK_LOGGING", Jdk14LoggingImpl.class);
+	    typeAliasRegistry.registerAlias("STDOUT_LOGGING", StdOutImpl.class);
+	    typeAliasRegistry.registerAlias("NO_LOGGING", NoLoggingImpl.class);
+	
+	    typeAliasRegistry.registerAlias("CGLIB", CglibProxyFactory.class);
+	    typeAliasRegistry.registerAlias("JAVASSIST", JavassistProxyFactory.class);
+	
+	    languageRegistry.setDefaultDriverClass(XMLLanguageDriver.class);
+	    languageRegistry.register(RawLanguageDriver.class);
+	 	 }
+	
+
+	
+
+	<environments default="development"> 
+		<environment id="development">
+			<transactionManager type="JDBC" />
+			<dataSource type="POOLED">
+				<property name="driver" value="${jdbc.driver}" />
+				<property name="url" value="${jdbc.url}" />
+				<property name="username" value="${jdbc.username}" />
+				<property name="password" value="${jdbc.password}" />
+			</dataSource>
+		</environment>
+	</environments>
+	
+	
+	
+	
+	
+<mappers>标签中：
+	mapper标签中属性的使用，一个一个注册：
+		resource:引用类路径下的sql映射文件
+		url:引用磁盘路径或者网络路径下的sql映射文件
+		
+		class:引用接口
+			如果有映射配置文件，那么要把映射文件和接口放在同一个包中，并且接口的文件名和映射文件名一致，这样才能最终引用到映射文件
+			如果没有映射配置文件，使用的是注解的方式进行sql语句操作，	所有的sql都是利用注解写在接口上，直接用就好了
+			
+	
+	批量注册，要把映射文件和接口放在同一个包中，并且接口的文件名和映射文件名一致：
+		<package name="com.zhiyou.mybatis.dao.StudentMapper"/>
+	这样的话，xml映射文件和接口在同一个包中，文件多的话看起来很不方便，这时，可以建一个资源文件夹，在资源文件夹中
+	建一个包名，包名和接口的包名相同，把xml映射资源文件放在资源文件夹的包内，这样接口文件和映射文件表面上就分开了，
+	看起开很舒服，但实际上，包名重复会合并，在workspace中，xml映射文件和接口还是在同一个文件夹中
+	
+		
+	
+	
+	
+	
+标签的使用顺序：
+	在全局配置文件中，标签<configuration>鼠标悬停查看标签的使用，可看到：
+		Content Model : (properties?, settings?, typeAliases?, typeHandlers?, objectFactory?, 
+		 objectWrapperFactory?, reflectorFactory?, plugins?, environments?, databaseIdProvider?, mappers?)
+	标签的使用顺序按照定义的使用顺序即可

@@ -1,0 +1,15 @@
+	
+	
+	使用老旧的方法进行增删改查，selectOne()等等方法中，
+		第一个参数代表sql语句在映射问价中的唯一标示
+		第二个参数为传递给sql语句的参数
+		<T> T selectOne(String statement, Object parameter);
+		
+	
+
+	
+	
+	
+	
+	
+	

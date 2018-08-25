@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zhiyou.mybatis.dao.PeopleMapper">
+
+
+
+
+
+	<!-- 使用结果集 -->
+	<resultMap type="people" id="peopleResultMap">
+		<id property="id" column="id" jdbcType="BIGINT" />
+		<result property="name" column="name" jdbcType="VARCHAR" />
+		<result property="age" column="age" jdbcType="BIGINT" />
+		<result property="sex" column="sex" jdbcType="INTEGER" />
+		<result property="status" column="status" jdbcType="VARCHAR" />
+		<result property="info" column="info" jdbcType="VARCHAR" />
+	</resultMap>
+
+
+
+
+	<!-- 定义sql片段 -->
+	<sql id="selectAll">
+		select * from people
+	</sql>
+
+
+
+
+
+
+	<select id="selectPeopleById" parameterType="_int" resultMap="peopleResultMap">
+		<include refid="selectAll"/>
+		<where>
+			id=#{id}
+		</where>
+	</select>
+
+
+
+
+
+
+	<!-- 
+		如果参数类型为String类型
+		只有一个： 在if标签test表达式中，可以直接使用这个参数（必须写成value，写成其他值会出错），不用加${}, ${value}这种方式会报错 ，
+		#{value}可以正常使用,在正常的sql语句中，可以使用${value}获取参数，也可以使用#{value}获取参数 
+	-->
+	<select id="selectActivePeopleByInfo" parameterType="string"
+		resultMap="peopleResultMap">
+		select * from people where status=1
+		<if test="value!=null and value !=''">
+			and info like '${value}'
+		</if>
+	</select>
+
+
+
+
+
+
+	<!--  
+		如果传入的参数类型为Map集合，那么不用显式声明类型，
+		需要注意的是，在标签语句中的表达式中，取得Map集合中传入的参数，不用加#{},直接写参数名即可获取
+		
+		不报错：<if test="info !=null and info !=''">
+		不报错：<if test="#{info} !=null and info !=''">
+		报错：<if test="#{info} !=null and #{info} !=''">
+		报错提示：java.lang.IllegalArgumentException: invalid comparison: java.util.LinkedHashMap and java.lang.String
+		
+		
+		这样设计并不合理：
+		
+			<if test="#{info} !=null and #{info} !=''">
+				where status=#{status} and info like #{info}
+			</if>
+			
+			应分成两条判断语句：
+			
+			<if test="#{info} !=null and info !=''">
+				where info like #{info}
+			</if>
+			<if test="#{status} !=null and status!=''">
+				and status=#{status} 
+			</if>	
+			
+			
+		在正常的sql语句中，要使用 # 或者 $ 来获取参数值，例如：where info like #{info}
+		
+		多条件选择sql语句中，应该如下这样设计：
+	-->
+	<select id="selectByMap1" resultMap="peopleResultMap">
+		select * from people 
+		<where>
+			<if test="#{info} !=null and info !=''">
+				and info like #{info}
+			</if>
+			<if test="#{status} !=null and status!=''">
+				and status=#{status}
+			</if>
+		</where>
+	</select>
+
+
+
+
+
+
+
+
+	<!--  
+		 choose - when - otherwise 相当于 if elseif else
+	-->
+	<select id="selectByMap2" resultMap="peopleResultMap">
+		select * from people where sex=#{sex}
+		<choose>
+			<when test="#{status} !=null and status!=''">and status=#{status}</when>
+			<when test="#{info} !=null and info !=''">and info like #{info}</when>
+			<when test="#{age} !=null and age!=''">and age=#{age}</when>
+			<otherwise>
+				
+			</otherwise>
+		</choose>
+	</select>
+	
+	
+	
+	
+	
+	
+	<!--  
+		prefixOverrides 属性会忽略通过管道分隔的文本序列（注意此例中的空格也是必要的）。
+		它的作用是移除所有指定在 prefixOverrides 属性中的内容，并且插入 prefix 属性中指定的内容
+	-->
+	<select id="trimByMap" resultMap="peopleResultMap">
+		<!-- 使用sql片段 -->
+		<include refid="selectAll"/>
+		<!-- 此时，trim标签的作用同where标签的作用相同 -->
+		<trim prefix="where" prefixOverrides="and |or">
+			<if test="#{info} !=null and info !=''">
+				and info like #{info}
+			</if>
+			<if test="#{status} !=null and status!=''">
+				and status=#{status}
+			</if>
+		</trim>
+	</select>
+
+
+
+
+
+
+
+	<!-- 传入的参数类型为People类型，表达式中直接使用属性值即可 -->
+	<select id="trimByPeople" parameterType="people" resultMap="peopleResultMap">
+		<include refid="selectAll" />
+		<trim prefix="where" prefixOverrides="and |or">
+			<if test="name !=null and name !=''">
+				and name like #{name}
+			</if>
+			<if test="info !=null and info !=''">
+				and info like #{info}
+			</if>
+		</trim>
+	</select>
+
+
+
+
+
+
+
+	<!-- 使用这种方式更新数据，没有修改的数据不会变成null值，而是维持原来的数据形态 -->
+
+	<!-- 前缀覆盖和后缀覆盖等的属性元素，只是把最开头和最末尾的，要覆盖的覆盖掉，在中间的并不覆盖 -->
+
+	<!-- 这里，set 元素会动态前置 SET 关键字，同时也会删掉无关的逗号，因为用了条件语句之后很可能就会在生成的 SQL 
+		   语句的后面留下这些逗号。（译者注：因为用的是“if”元素，若最后一个“if”没有匹配上而前面的匹配上，SQL 语句
+		   的最后就会有一个逗号遗留）
+
+		   若你对 set 元素等价的自定义 trim 元素的代码感兴趣，那这就是它的真面目：
+
+		 <trim prefix="SET" suffixOverrides=",">
+  			...
+		 </trim>
+	               注意这里我们删去的是后缀值，同时添加了前缀值 
+	-->
+	<update id="updatePeople" parameterType="people">
+		update people
+		<set>
+			<if test="name !=null and name!=''">name=#{name},</if>
+			<if test="age!=null and name!=''">age=#{age},</if>
+			<if test="info!=null and name!=''">info=#{info},</if>
+			<if test="status!=null and name!=''">status=#{status},</if>
+			<if test="sex!=null and name!=''">sex=#{sex}</if>
+		</set>
+		where id=#{id}
+	</update>
+	
+	
+	
+	
+	
+	
+	
+	
+	<delete id="deletePeopleById" parameterType="_int">
+		delete from people where id=#{id}
+	</delete>
+
+
+
+
+
+
+
+	<!-- 
+		foreach标签中，collection属性值为：list，如果写成lis等其他值，
+		会报错：org.apache.ibatis.binding.BindingException: Parameter 'lis' not found. Available parameters are [collection, list] 
+		验证发现：delete标签中，parameterType="list" 写不写都行
+	-->
+	<delete id="deletePeopleByList" >
+		delete from people
+		where id in
+		<foreach collection="list" item="id" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+	
+	
+	
+
+</mapper>

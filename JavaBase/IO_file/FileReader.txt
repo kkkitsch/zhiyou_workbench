@@ -1,0 +1,1 @@
+﻿这是FileReader.txt的内容！

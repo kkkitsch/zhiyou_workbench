@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zhiyou.mybatis.dao.UserMapper">
+
+	<!-- 开启二级缓存 -->
+	<!-- <cache></cache> -->
+	<!-- 使用第三方缓存 -->
+	<cache type="org.mybatis.caches.ehcache.EhcacheCache"></cache>
+	
+	
+	
+
+	<resultMap type="user" id="userMap">
+		<id property="id" column="id" jdbcType="INTEGER" />
+		<result property="username" column="username" jdbcType="VARCHAR" />
+		<result property="password" column="password" jdbcType="VARCHAR" />
+		<result property="age" column="age" jdbcType="INTEGER" />
+	</resultMap>
+
+	<select id="getUserById" parameterType="_int" resultMap="userMap">
+		select *
+		from user where id=#{id_random}
+	</select>
+
+
+	<select id="getUserById1" parameterType="_int" resultMap="userMap">
+		select
+		*
+		from user where id=${value}
+	</select>
+
+
+	<select id="getUserById2" parameterType="string" resultMap="userMap">
+		select
+		*
+		from user where id= ${value}
+	</select>
+
+	<!-- 返回类型可以为一个Map，只包含一条数据，mybatis为类型做了一些封装 -->
+	<select id="getUserReturnMap" parameterType="string" resultType="map">
+		select
+		*
+		from user where id= ${value}
+	</select>
+
+	<!-- 返回类型为一个Map,包含多条数据 -->
+	<select id="getUserByLikeReturnMap" resultType="map">
+		select * from
+		user where username like #{name}
+	</select>
+
+
+	<select id="getAllUsers" resultMap="userMap">
+		select * from user
+	</select>
+
+
+	<select id="getUserByLike" resultMap="userMap">
+		select * from user where
+		username LIKE #{name}
+	</select>
+
+
+	<insert id="insertUser" parameterType="user" useGeneratedKeys="true"
+		keyProperty="id">
+		insert into
+		user(username,password,age)
+		value(#{username},#{password},#{age})
+	</insert>
+
+
+	<!-- 测试使用内置参数：_parameter -->
+	<insert id="insertUser1" parameterType="user" useGeneratedKeys="true"
+		keyProperty="id">
+		insert into
+		user(username,password,age)
+		<if test="_parameter !=null">
+			value(#{username},#{password},#{age})
+		</if>
+	</insert>
+
+
+
+
+
+
+
+
+	<delete id="deleteUser" parameterType="_int">
+		delete from user where
+		id=#{id}
+	</delete>
+
+	<!-- 使用Map集合进行参数传递，可以使用级联属性 -->
+	<update id="updateUser">
+		update user set
+		password=#{user.password} where
+		id=#{user.id}
+	</update>
+
+
+
+
+	<select id="getUserByPage" resultMap="userMap">
+		select * from user
+		limit
+		#{startPage} ,#{endPage}
+	</select>
+
+
+	<select id="getUserByPage1" resultMap="userMap">
+		select * from user limit
+		#{param1} ,#{param2}
+	</select>
+
+
+	<select id="getUserByPage2" resultMap="userMap">
+		select * from user
+		limit
+		#{startPage} ,#{endPage}
+	</select>
+
+</mapper>

@@ -1,0 +1,258 @@
+
+中间表不用自己创建，由系统创建
+
+
+双向关联中的代码和日志信息：
+	代码：
+		@Test // 双向关联
+		public void add() {
+	
+			// 新建两个用户
+			User u1 = new User();
+			u1.setUser_name("陈冠希");
+			u1.setUser_password("111111");
+			u1.setUser_state("1");
+	
+			User u2 = new User();
+			u2.setUser_name("张柏芝");
+			u2.setUser_password("666666");
+			u2.setUser_state("0");
+	
+			// 新建两个角色
+			Role r1 = new Role();
+			r1.setRole_name("演员");
+			r1.setRole_memo("其实，我是一个演员");
+	
+			Role r2 = new Role();
+			r2.setRole_name("歌手");
+			r2.setRole_memo("其实，我是一个演员");
+	
+			// 陈冠希：演员+歌手
+			u1.getRoles().add(r1);
+			u1.getRoles().add(r2);
+			r1.getUsers().add(u1);
+			r2.getUsers().add(u1);
+	
+			// 张柏芝：演员
+			u2.getRoles().add(r1);
+			r1.getUsers().add(u2);
+	
+			session.save(u1);
+			session.save(u2);
+			session.save(r1);
+			session.save(r2);
+		}
+	
+	
+	日志信息：
+		insert 
+	    into
+	        user
+	        (user_name, user_password, user_state) 
+	    values
+	        (?, ?, ?)
+
+
+	    insert 
+	    into
+	        user
+	        (user_name, user_password, user_state) 
+	    values
+	        (?, ?, ?)
+
+
+	    insert 
+	    into
+	        role
+	        (role_name, role_memo) 
+	    values
+	        (?, ?)
+
+
+	    insert 
+	    into
+	        role
+	        (role_name, role_memo) 
+	    values
+	        (?, ?)
+
+
+	    insert 
+	    into
+	        user_role
+	        (user_id, role_id) 
+	    values
+	        (?, ?)
+
+
+	    insert 
+	    into
+	        user_role
+	        (user_id, role_id) 
+	    values
+	        (?, ?)
+
+
+	    insert 
+	    into
+	        user_role
+	        (user_id, role_id) 
+	    values
+	        (?, ?)
+
+
+	    insert 
+	    into
+	        user_role
+	        (role_id, user_id) 
+	    values
+	        (?, ?)
+
+
+	    insert 
+	    into
+	        user_role
+	        (role_id, user_id) 
+	    values
+	        (?, ?)
+
+
+	    insert 
+	    into
+	        user_role
+	        (role_id, user_id) 
+	    values
+	        (?, ?)
+		
+		
+		双向关联中，user表和role表都进行了外键的维护，所以，在系统自动生成的user_role表中，
+		所有的数据都会有两条重复的，如果想要解决这种问题，可以在任意一方配置放弃外键维护，
+		即：inverse="true",即可消除这种重复，配置后的日志信息输出如下：
+		
+		
+		Hibernate: 
+	    insert 
+	    into
+	        user
+	        (user_name, user_password, user_state) 
+	    values
+	        (?, ?, ?)
+
+
+	    insert 
+	    into
+	        user
+	        (user_name, user_password, user_state) 
+	    values
+	        (?, ?, ?)
+
+
+	    insert 
+	    into
+	        role
+	        (role_name, role_memo) 
+	    values
+	        (?, ?)
+
+
+	    insert 
+	    into
+	        role
+	        (role_name, role_memo) 
+	    values
+	        (?, ?)
+
+
+	    insert 
+	    into
+	        user_role
+	        (role_id, user_id) 
+	    values
+	        (?, ?)
+
+
+	    insert 
+	    into
+	        user_role
+	        (role_id, user_id) 
+	    values
+	        (?, ?)
+
+
+	    insert 
+	    into
+	        user_role
+	        (role_id, user_id) 
+	    values
+	        (?, ?)
+	
+	
+	
+	
+	
+单向关联不配置 cascade="save-update" 会报错提示：不能保存瞬态实例，配置后日志信息：
+	
+	    insert 
+	    into
+	        user
+	        (user_name, user_password, user_state) 
+	    values
+	        (?, ?, ?)
+	
+	    insert 
+	    into
+	        role
+	        (role_name, role_memo) 
+	    values
+	        (?, ?)
+	
+	    insert 
+	    into
+	        role
+	        (role_name, role_memo) 
+	    values
+	        (?, ?)
+	
+	    insert 
+	    into
+	        user
+	        (user_name, user_password, user_state) 
+	    values
+	        (?, ?, ?)
+	
+	    insert 
+	    into
+	        user_role
+	        (user_id, role_id) 
+	    values
+	        (?, ?)
+	
+	    insert 
+	    into
+	        user_role
+	        (user_id, role_id) 
+	    values
+	        (?, ?)
+	
+	    insert 
+	    into
+	        user_role
+	        (user_id, role_id) 
+	    values
+	        (?, ?)
+
+
+
+
+
+在多对多表的删除时，如果只想删除关联关系，那么，只需要在其中一方配置 cascade="delete" ,具体例子如下：
+	
+	代码：
+		User user = session.get(User.class, 53L);
+		Role role = session.get(Role.class, 49L);
+		user.getRoles().remove(role);
+		
+		要让role角色和user角色失去关联关系，User.hbm.xml中的配置：
+		<set name="roles" table="user_role" cascade="delete">
+		不能在Role.hbm.xml中也配置：cascade="delete"，否则会把相关联的表中的数据都清空
+	

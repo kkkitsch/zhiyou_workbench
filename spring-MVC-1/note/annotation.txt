@@ -1,0 +1,137 @@
+
+@RequestMapping注解
+
+	@RequestMapping(value = "/hello", method = RequestMethod.GET, params = { "name!=kkkitsch", "age!=21" }, headers = {
+			"accept=text/html" })
+			
+	@RequestMapping注解可以放在类上或者方法上，其中可以添加一些 属性：
+	
+		value = "/hello"							：传进来的地址
+		method = RequestMethod.GET					：请求方法类型
+		params = { "name!=kkkitsch", "age!=21" }	：请求方法包含的参数
+		headers = { "accept=text/html" }			：请求头
+		
+		
+Ant风格资源地址支持三种匹配符的请求映射
+	
+	?  匹配文件名中的一个字符
+	*  匹配文件名中的任意字符
+	** 匹配多层路径
+	
+REST风格
+
+	需要使用过滤器：
+		<filter>
+			<filter-name>hiddenHttpMethodFilter</filter-name>
+			<filter-class>org.springframework.web.filter.HiddenHttpMethodFilter</filter-class>
+		</filter>
+		<filter-mapping>
+			<filter-name>hiddenHttpMethodFilter</filter-name>
+			<url-pattern>/*</url-pattern>
+		</filter-mapping>
+		
+	过滤器可以过滤我们所有的请求，并且将请求分为四种：
+		get-->
+		post--->
+			寻找请求参数，是否有一个名字为_method这样的一个请求方式，有：--->DELETE,PUT请求
+													没有：--->POST请求
+	
+@RequestParam：获取请求参数
+	
+	可以将请求参数与我们处理方法的形参进行绑定：
+		1、如果形参名字与请求参数名称一致，可以省略@RequestParam
+		2、形参名字与请求参数名称不一致，那么@RequestParam标注中的value属性值必须与请求参数一致
+		
+	@RequestParam中的属性：
+		value  ： 请求参数名称
+		required  ：是否必须包含这个请求参数
+		
+通过pojo获取请求参数
+
+	方法当中的参数应为pojo类：public String testRequestParamByPojo_01(User user) 
+	
+	form表单：
+		<form action="helloWorldHandler/testRequestParamByPojo" method="post">
+			id:<input type="text" name="id">
+			<br> 
+			name:<input type="text" name="name">
+			<br> <input type="submit" value="testRequestParamByPojo">
+		</form>
+		
+		
+	pojo属性的级联
+		方法当中的参数应为pojo类：public String testRequestParamByPojo_01(User user) 
+		
+			测试获取级联请求参数，通过pojo的方式：
+				form表单：
+				<form action="helloWorldHandler/testRequestParamByPojo_01" method="post">
+					id:<input type="text" name="id">
+					<br> 
+					name:<input type="text" name="name">
+					<br> 
+					city:<input type="text" name="address.city">
+					<br>
+					street:<input type="text" name="address.street">
+					<br>
+					<input type="submit" name="testRequestParamByPojo_01">
+				</form>
+
+获取cookie
+
+获取getServletAPI
+
+ModelAndView，Map，Model，ModelMap
+
+@SessionAttributes
+	1、要求放置的值，必须在模型数据里面（request范围中）
+	2、标注属性
+		·标注在控制器上方
+		·通过属性key值完成session的共享数据类型：@SessionAttributes(value = { "city" })
+		·可以通过模型数据当中的类型，来完成共享数据的设置：@SessionAttributes(types = String.class)
+		
+		
+		
+ModelAttribute
+	/**
+	 * testModelAttribute
+	 * 
+	 * 在方法参数中，如果不加注解：@ModelAttribute(value = "nice")，只有Account
+	 * account，那么会自动关联Account类，并且会从request请求范围内查找是否有类的首字母小
+	 * 写的模型属性，如果有，就自动关联属性了，如果没有，会把页面表单中获取到的值和pojo中的属性关联，
+	 * 
+	 * 在方法参数中，如果加了注解：@ModelAttribute(value = "nice")，那么会根据value值进行关联
+	 */
+	@RequestMapping(value = "/modelAttribute")
+	public String testModelAttribute(@ModelAttribute(value = "kkk") Account account) {
+		System.out.println(account);
+		return "success";
+	}
+
+	/**
+	 * 练习@ModelAttribute修饰无返回值方法
+	 * 
+	 * 有@ModelAttribute注解是，会先执行这个方法
+	 * 
+	 * 为什么放在request请求范围内的模型属性可以在@ModelAttribute中找到
+	 */
+	@ModelAttribute
+	public void start(Map<String, Object> map) {
+		// 真是情况中应该从数据库中获取，这里只是简单模拟
+		Account account = new Account(007, "kkk", "2018-09-09");
+		map.put("nice", account);
+	}
+
+	/**
+	 * 练习@ModelAttribute修饰无返回值方法
+	 * 
+	 * 有@ModelAttribute注解是，会先执行这个方法
+	 * 
+	 * 为什么放在request请求范围内的模型属性可以在@ModelAttribute中找到
+	 */
+	@ModelAttribute(value = "kkk")
+	public Account start_01() {
+		// 真是情况中应该从数据库中获取，这里只是简单模拟
+		Account account = new Account(007, "kkk", "2018-09-09");
+		return account;
+	}
+		

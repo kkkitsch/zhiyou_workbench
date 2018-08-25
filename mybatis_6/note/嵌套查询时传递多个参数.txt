@@ -1,0 +1,57 @@
+
+	<association>中的column属性可以这样配置传递多个参数（具体参照官方文档）：
+	
+		 column="{key1=column1,key2=column2}"
+		 
+		 
+	实例，参数的传入：<association property="clazz" column="{prop1=student_id}"
+			select="com.zhiyou.mybatis.dao.ClazzMapper.getClazzById">
+		</association>
+		
+	参数的接收：
+		<select id="getClazzById" resultType="clazz">
+			select * from clazz left
+			join clazz_student
+			on
+			clazz.clazz_id=clazz_student.c_id
+			where
+			clazz_student.s_id=#{prop1}
+		</select>
+	
+	
+	我在传入多个参数时犯的错误：
+		当在column属性中指定要传入多个参数时，
+		在接受参数的select标签中，不能指定 parameterType="_int"
+		否则会报错：Cause: org.apache.ibatis.reflection.ReflectionException: 
+				Error instantiating int with invalid types () or values (). Cause: java.lang.NoSuchMethodException: int.<init>()
+		
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+		
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

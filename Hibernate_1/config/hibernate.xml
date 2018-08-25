@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC
+	"-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+	"http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+
+	<!-- 配置连接数据库信息 -->
+	<session-factory>
+
+		<!-- 必选配置 数据库连接配置 -->
+		<property name="hibernate.connection.driver_class">com.mysql.jdbc.Driver</property>
+		<property name="hibernate.connection.url">jdbc:mysql:///hibernate_01?useSSL=false</property>
+		<!-- 测试的时候用的数据库：<property name="hibernate.connection.url">jdbc:mysql:///hibernate_test?useSSL=false</property> -->
+		<property name="hibernate.connection.username">root</property>
+		<property name="hibernate.connection.password">kkkitsch1996</property>
+		<!-- 数据库方言 使用的数据库类型 -->
+		<property name="hibernate.dialect org.hibernate.dialect.MySQLDialect "></property>
+
+		<!-- 可选配置 -->
+		<!-- 操作数据库时,会 向控制台打印sql语句 -->
+		<property name="hibernate.show_sql">true</property>
+		<!-- 打印sql语句前,会将sql语句先格式化 -->
+		<property name="hibernate.format_sql">true</property>
+
+		<!-- c3p0连接池的配置 -->
+		<!-- 配置c3p0供应商 -->
+		<property name="hibernate.connection.provider_class">org.hibernate.connection.C3P0ConnectionProvider</property>
+		<!-- 最大连接数 -->
+		<property name="hibernate.c3p0.max_size">25</property>
+		<!-- 最小连接数 -->
+		<property name="hibernate.c3p0.min_size">5</property>
+		<!-- 最长连接时限，超过这个时间还连接不上，就报错 -->
+		<property name="hibernate.c3p0.timeout">60</property>
+		<!-- c3p0全局的PreparedStatements缓存的大小。如果maxStatements与maxStatementsPerConnection均为0，则缓存不生效，只要有一个不为0，则语句的缓存就能生效 -->
+		<property name="hibernate.c3p0.max_statements">20</property>
+		<!--每60秒检查所有连接池中的空闲连接。默认值: 0，不检查 -->
+		<property name="hibernate.c3p0.idle_test_period">60</property>
+
+		<!-- 自动建表的配置 -->
+		<!-- 第一种建表方式 创建后又删除（适合测试的时候用） <property name="hibernate.hbm2ddl.auto">create-drop</property> -->
+		<!-- 第二种建表方式 创建一个表（每次都创建一个表） <property name="hibernate.hbm2ddl.auto">create</property> -->
+		<!-- 第三种建表方式 （更新操作 如果没有表 就创建表 如果字段有改动 就更新到数据库里） -->
+		<property name="hibernate.hbm2ddl.auto">update</property>
+		<!-- 第四种建表方式 （用于验证 如果Javabean里的字段和数据库里的字段不一致 会给出提示）<property name="hibernate.hbm2ddl.auto">validate</property> -->
+
+		<!-- 可选配置 -->
+		<!-- 把Session绑定到当前线程 -->
+		<property name="hibernate.current_session_context_class">thread</property>
+
+		<!--必选配置 配置映射信息 -->
+		<mapping resource="com/zhiyou/bean/Customer.hbm.xml" />
+		<mapping resource="com/zhiyou/bean/LinkMan.hbm.xml" />
+
+	</session-factory>
+</hibernate-configuration>

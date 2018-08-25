@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zhiyou.mybatis.dao.ClazzMapper">
+
+	<select id="getClazzById" resultType="clazz">
+		select * from clazz left
+		join clazz_student
+		on
+		clazz.clazz_id=clazz_student.c_id
+		where
+		clazz_student.s_id=#{prop1}
+	</select>
+
+</mapper>

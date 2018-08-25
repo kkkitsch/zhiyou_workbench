@@ -1,0 +1,20 @@
+
+
+提示：在这个hibernate的练习中，session的定义的位置是不恰当的，也是不被推荐的，在此这样
+定义是为了方便练习
+
+
+
+
+
+引自mybatis中对于SqlSession的说明：
+
+	每个线程都应该有它自己的 SqlSession 实例。SqlSession 的实例不是线程安全的，
+	因此是不能被共享的，所以它的最佳的作用域是请求或方法作用域。绝对不能将 SqlSession
+	实例的引用放在一个类的静态域，甚至一个类的实例变量也不行。也绝不能将 SqlSession 实
+	例的引用放在任何类型的管理作用域中，比如 Servlet 架构中的 HttpSession。如果你现
+	在正在使用一种 Web 框架，要考虑 SqlSession 放在一个和 HTTP 请求对象相似的作用域
+	中。换句话说，每次收到的 HTTP 请求，就可以打开一个 SqlSession，返回一个响应，就关
+	闭它。这个关闭操作是很重要的，你应该把这个关闭操作放到 finally 块中以确保每次都能执行关闭
+
+hibernate中的Session和Mybatis中的SqlSession类似

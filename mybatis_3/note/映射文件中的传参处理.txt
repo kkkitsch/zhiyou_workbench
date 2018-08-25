@@ -1,0 +1,110 @@
+
+传入单个参数：
+	比如：User getUserById(int id);
+	在映射文件中，mybatis不会做处理，直接通过 #{参数名称} 获取即可，实际上，由于参数名称只有一个，所以，参数名称可以为任意值
+	
+	
+
+	
+	
+传入多个参数的处理：
+
+	传入的参数为一个实体类bean对象：
+		比如：int insertUser(User user);
+		在映射文件中，直接通过 #{实体类属性名} 获取即可
+		这种情况适用于传输的多个参数正好是业务逻辑的实体类数据
+
+
+	给接口添加注解：List<User> getUserByPage(@Param(value = "startPage") int start, @Param(value = "endPage") int end);
+	这时，映射文件中获取参数的方式为  #{注解中value的值}，也就是说，注解的value值要和此映射文件的占位值保持一致
+	使用这种方式，参数改变的话，注解也要随着改变，很麻烦，不推荐
+	
+	
+	在映射文件中使用索引的方式，获取参数，比如接口定义为：List<User> getUserByPage1(int startPage, int endPage);
+	这时，mybatis会将这两个参数封装成一个map，使用方式为：
+		<select id="getUserByPage1" resultMap="userMap">
+			select * from user limit
+			#{param1} ,#{param2}
+		</select>
+	用这种方式，不容易分辨参数
+		
+		
+	使用Map集合的方式，比如：List<User> getUserByLike(Map<String, Object> map);
+	java代码：
+	Map<String, Object> map = new HashMap<String, Object>();
+	map.put("name", "%张%");
+	映射文件中，参数的获取为：#{Map集合中的key值}
+	这种方式适用于传入的参数不是对应的实体类数据模型，为了方便，可以传入Map，不经常使用
+	
+	
+	TO:transfer object
+	如果多个参数不是实体类模型数据，但是要经常使用，为了方便，可以编写一个TO数据传输对象
+	Page{
+		int index;
+		int size;
+	}
+	
+	
+	
+	
+	
+	
+使用$进行传参
+
+	参数类型为int类型， $ 两边不用加引号，此时，sql语句为：select * from user where id=1
+	<select id="getUserById1" parameterType="_int" resultMap="userMap">
+		select
+		*
+		from user where id=${value}
+	</select>
+
+	参数为String类型，这种情况  $ 两边也不需要加引号
+	<select id="getUserById2" parameterType="string" resultMap="userMap">
+		select
+		*
+		from user where id= ${value}
+	</select>
+
+
+	需要加引号：
+	<!-- 动态sql，使用'$'和'#'两种方式查询people表中status为'1'并且info中包含'is'的people数据 -->
+	<select id="selectActivePeopleByInfo" parameterType="string" resultMap="peopleResultMap">
+		select * from people where status=1
+		<if test="value !=null and value !=''">
+			and info like '${value}'
+		</if>
+	</select>
+
+
+
+
+
+
+补充说明
+
+　　#{}：可以获取map中的值或者pojo对象属性的值；
+
+　　${}：可以获取map中的值或者pojo对象属性的值；
+
+	如果映射配置文件中的sql语句为：
+	select * from tbl_employee where id=${id} and last_name=#{lastName}
+	那么预编译后，sql语句为：
+	select * from tbl_employee where id=2 and last_name=?
+
+　　区别：
+　　　#{}:是以预编译的形式，将参数设置到sql语句中；PreparedStatement；防止sql注入。
+		如果原生JDBC不支持占位符的地方需要进行传参取值，那么，就不能使用#{}的方式进行取值，需要使用${}c才行
+
+　　　${}:取出的值直接拼装在sql语句中；会有安全问题；大多情况下，我们去参数的值都应该去使用#{}
+	当参数表示表名或者列名的时候，只能使用$ ，此时$外面不用加单引号
+
+
+
+
+
+
+
+
+
+
+	

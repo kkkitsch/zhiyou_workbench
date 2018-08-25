@@ -1,0 +1,92 @@
+
+在映射配置文件中，增删改的sql标签无返回值，但是在接口中，我们可以定义返回值来判断sql语句的成功执行与否
+一般，可以定义的类型为：基本类型int,long,boolean，或者他们的包装类型：Integer,Long,Boolean或者void
+
+	int,long，Integer,Long：sql语句执行后返回受影响的行数
+	boolean,Boolean:成功执行返回true
+	
+	
+在映射配置文件中，查询的返回值可以为：
+
+	resultMap：返回一个结果集
+	resultType：返回一个对象类型
+	
+	当返回多条数据的时候，依然可以这样配置，mybatis会自动为我们做一些处理，做一些类型转换
+	比如，接口中定义的返回值类型为：
+		List<User> getUserByLike(Map<String, Object> map);
+	在映射文件中，仍然可以使用一个结果集：
+		<select id="getUserByLike" resultMap="userMap">
+			select * from user where
+			username LIKE #{name}
+		</select>
+		
+		
+		
+	resultTpye可以返回一个Map集合：
+	
+		Map集合中只包含一条数据：
+		
+			接口：Map<String, Object> getUserReturnMap(int id);
+			
+			映射语句：
+				<select id="getUserReturnMap" parameterType="string" resultType="map">
+					select
+					*
+					from user where id= ${value}
+				</select>
+						
+			java代码：
+				Map<String, Object> user = mapper.getUserReturnMap(1);
+				if (user != null) {
+					logger.info("查询成功,获取的数据为：{}", user);
+				}
+						
+						
+		Map集合包含多条数据：
+		
+			接口：
+				/*
+				 * 注解的作用为：告知mybatis，在使用Map集合对查询出的多个User数据进行封装时，将实体类中的哪个属性作为这个Map集合的key
+				 * 
+				 * 当然，MapKey注解中，也可以指定其他属性值，比如所实体类的username属性,只需将返回类型改成：Map<String,User>,
+				 * 这时要特别注意：如果查询出的username有多个相同的话，会覆盖值哦
+				 * 
+				 * 如果不使用MapKey注解，会查询失败
+				 */
+				@MapKey("id")
+				Map<Integer, User> getUserByLikeReturnMap(String name);
+				
+			映射sql语句：
+				<select id="getUserByLikeReturnMap" resultType="map">
+					select * from
+					user where username like #{name}
+				</select>
+						
+			java代码：
+				Map<Integer, User> user = mapper.getUserByLikeReturnMap("%k%");
+				if (user != null) {
+					logger.info("查询成功lalalalala,获取的数据为：{}", user);
+				}
+							
+						
+						
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						

@@ -1,0 +1,28 @@
+基于xml文件形式配置AOP
+	
+	前提：导入aop命名空间
+	
+	<!-- 获取bean实例，相当于注解中的：@Component -->
+	<bean id="computerImp" class="com.spring.proxy.ComputerImp"></bean>
+	<bean id="aspect" class="com.spring.proxy.AOP_AspectJ"></bean>
+
+	<aop:config>
+
+		<!-- 重用切入点，相当于注解中的：@Pointcut() -->
+		<!-- 放在config内部，作用域为全部aspect，放在aspect内部，只针对哪一个aspect -->
+		<aop:pointcut
+			expression="execution(public int com.spring.proxy.ComputerImp.*(..))"
+			id="pointcut_01" />
+
+		<!-- 创建一个切面，相当于注解中的：@Aspect -->
+		<aop:aspect id="aspect" ref="aspect">
+
+			<!-- 前置通知 -->
+			<aop:before method="beforeAll"
+				pointcut="execution(public int com.spring.proxy.ComputerImp.*(..))" />
+
+			<!-- 后置通知 -->
+			<aop:after method="afterAll" pointcut-ref="pointcut_01" />
+		</aop:aspect>
+
+	</aop:config>

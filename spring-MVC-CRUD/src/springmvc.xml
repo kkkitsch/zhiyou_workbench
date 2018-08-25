@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
+
+
+	<!-- 扫描包 -->
+	<context:component-scan base-package="com.springmvc.test"></context:component-scan>
+	<context:component-scan base-package="com.springmvc.handler"></context:component-scan>
+	<context:component-scan base-package="com.springmvc.view"></context:component-scan>
+	<context:component-scan base-package="com.springmvc.converter"></context:component-scan>
+
+	<!-- 默认视图解析器:逻辑视图，物理视图 -->
+	<bean
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<!-- 逻辑视图：hello 解析为物理视图：/hello.jsp -->
+		<property name="prefix" value="/"></property>
+		<property name="suffix" value=".jsp"></property>
+	</bean>
+
+	<!-- 加载静态资源，让核心控制器无效 -->
+	<mvc:default-servlet-handler />
+	<!-- 使用了自定义类型转换器需要在此标签中加上属性：conversion-service -->
+	<!-- 使用了验证框架，需要加上属性：validator -->
+	<mvc:annotation-driven validator="validate"
+		conversion-service="conversionService" />
+
+	<!--类型转换器配置 -->
+	<!--控制器是bean，必须配置注解 -->
+	<bean id="conversionService"
+		class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
+		<property name="converters">
+			<set>
+				<bean class="com.springmvc.converter.StringToUserConverter"></bean>
+			</set>
+		</property>
+	</bean>
+
+	<!-- 使用JSR303验证，默认已经配置，这里再显式配置 -->
+	<bean id="validate"
+		class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean"></bean>
+
+
+	<!-- 加载配置文件，完成错误消息的定制以及国际化： 1、在配置文件中完成key=value的错误消息 key的规则：验证规则名称.model.属性名 
+		2、在springmvc容器中完成bean的配置 -->
+	<bean id="messageSource"
+		class="org.springframework.context.support.ResourceBundleMessageSource">
+		<property name="basename" value="abc"></property>
+	</bean>
+
+	<!-- 在页面中动态引入国际化资源配置文件的数据 -->
+	<bean id="localeResolver"
+		class="org.springframework.web.servlet.i18n.SessionLocaleResolver"></bean>
+
+	<!-- 配置拦截器 -->
+	<mvc:interceptors>
+		<!-- 引入国际化资源配置文件的数据，需要配置的拦截器 -->
+		<bean id="localeChangeInterceptor"
+			class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor"></bean>
+		<!-- 当访问配置路径的时候，就调用自定义拦截器 -->
+		<mvc:interceptor>
+			<mvc:mapping path="/formError" />
+			<bean id="myInterceptor" class="com.springmvc.interceptor.MyInterceptor" />
+		</mvc:interceptor>
+	</mvc:interceptors>
+
+	<!-- 配置一个访问global.jsp页面的视图控制器，因为直接访问global.jsp页面不加载IoC容器，会出错 -->
+	<mvc:view-controller path="/GlobalA" view-name="global" />
+
+</beans>

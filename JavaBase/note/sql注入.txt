@@ -1,0 +1,112 @@
+
+一、Statement和PreparedStatement的区别
+
+先来说说，什么是java中的Statement：Statement是java执行数据库操作的一个重要方法，用于在已经建立数据库连接的基础上，向数据库发送要执行的SQL语句。具体步骤：
+　　1.首先导入java.sql.*；这个包。
+　　2.然后加载驱动，创建连接，得到Connection接口的的实现对象，比如对象名叫做conn。
+　　3.然后再用conn对象去创建Statement的实例，方法是：Statement stmt = conn.creatStatement("SQL语句字符串");
+　　Statement 对象用于将 SQL 语句发送到数据库中。实际上有三种 Statement 对象，它们都作为在给定连接上执行 SQL语句的包容器：Statement、PreparedStatement（它从 Statement 继承而来）和CallableStatement（它从 PreparedStatement 继承而来）。它们都专用于发送特定类型的 SQL 语句：Statement 对象用于执行不带参数的简单 SQL 语句；PreparedStatement 对象用于执行带或不带参数的预编译 SQL 语句；CallableStatement 对象用于执行对数据库已存储过程的调用。
+　　综上所述，总结如下：Statement每次执行sql语句，数据库都要执行sql语句的编译，最好用于仅执行一次查询并返回结果的情形，效率高于PreparedStatement.但存在sql注入风险。PreparedStatement是预编译执行的。在执行可变参数的一条SQL时，PreparedStatement要比Statement的效率高，因为DBMS预编译一条SQL当然会比多次编译一条SQL的效率高。安全性更好，有效防止SQL注入的问题。对于多次重复执行的语句，使用Prepared
+Statement效率会更高一点。执行SQL语句是可以带参数的，并支持批量执行SQL。由于采用了Cache机制，则预编译的语句，就会放在Cache中，下次执行相同的SQL语句时，则可以直接从Cache中取出来。
+PreparedStatement pstmt = con.prepareStatement("UPDATE EMPLOYEES SET name= ? WHERE ID = ?"); pstmt.setString(1, "李四"); pstmt.setInt(2, 1); pstmt. executeUpdate();
+那么CallableStatement扩展了PreparedStatement的接口，用来调用存储过程，它提供了对于输入和输出参数的支持，CallableStatement 接口还有对 PreparedStatement 接口提供的输入参数的sql查询的支持。
+PreparedStatement: 数据库会对sql语句进行预编译，下次执行相同的sql语句时，数据库端不会再进行预编译了，而直接用数据库的缓冲区，提高数据访问的效率（但尽量采用使用？号的方式传递参数），如果sql语句只执行一次，以后不再复用。 从安全性上来看，PreparedStatement是通过?来传递参数的，避免了拼sql而出现sql注入的问题，所以安全性较好。
+在开发中，推荐使用 PreparedStatement
+
+
+
+
+
+
+二、PreparedStatement比Statement有什么优势
+
+1.PreparedStatement能预编译，这条预编译的SQL查询语句能在将来的查询中重用，这样一来，它比Statement对象生成的查询速度更快。 
+2.PreparedStatement可以写动态参数化的查询 
+3.PreparedStatement可以防止SQL注入式攻击 
+4.PreparedStatement查询可读性更好，追加条件的语句很乱 
+5.PreparedStatement不允许一个占位符（？）有多个值
+
+
+
+
+
+
+
+
+
+为什么它这样处理就能预防SQL注入提高安全性呢？其实是因为SQL语句在程序运行前已经进行了预编译，在程序运行时第一次操作数据库之前，SQL语句已经被数据库分析，编译和优化，对应的执行计划也会缓存下来并允许数据库已参数化的形式进行查询，当运行时动态地把参数传给PreprareStatement时，即使参数里有敏感字符如 or '1=1'也数据库会作为一个参数一个字段的属性值来处理而不会作为一个SQL指令，如此，就起到了SQL注入的作用了！
+
+
+
+
+
+
+
+
+
+看下面的代码：
+
+public static void main(String[] args) throws Exception {
+        Scanner sc = new Scanner(System.in);
+        System.out.println("账号：");
+        String uid = sc.nextLine();
+        System.out.println("密码：");
+        String pwd = sc.nextLine();
+        
+        Class.forName("com.mysql.jdbc.Driver");
+        Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/mydb?characterEncoding=GBK","root","");
+        Statement state = conn.createStatement();
+        
+        String sql = "select * from users where user ='"+uid+"' and password ='"+pwd+"' ";
+        ResultSet rs = state.executeQuery(sql);
+        boolean ok = rs.next();
+        if(ok){
+            System.out.println("欢迎"+rs.getString(3)+"回来");
+        }
+        else{
+            System.out.println("您输入的账号密码错误");
+        }
+        conn.close();
+    }
+
+我们正常输入账号密码是运行正确的，但是当我们账号输入：kjaskj' or 1=1 #  密码输入：klkjl;  就会出现以下的结果：
+欢迎张三回来
+这里，关键在  账号里面的那个单引号 “ ‘ ’”和后面 or 1=1以及#号（我们这里用的是mysql，oracle后面用 --）。这样查询语句就变成了：
+select * from users where user ='kjaskj'or1=1#' and password ='"+pwd+"' 
+该双划符号#告诉SQL解析器，右边的东西全部是注释，所以不必理会。这样，查询字符串相当于：
+
+select * from users where user =''OR1=1.   这样输出的就是ture。  就能不用账号密码直接进入。
+
+
+
+当然这里也有办法阻止此类事件的发生。
+
+在代码中间插入一个替换一句，将该方法中所有的单引号替换成双引号，就不会发生类似的事情。代码如下：
+
+public static void main(String[] args) throws Exception {
+        Scanner sc = new Scanner(System.in);
+        System.out.println("账号：");
+        String uid = sc.nextLine();
+        System.out.println("密码：");
+        String pwd = sc.nextLine();
+        
+        Class.forName("com.mysql.jdbc.Driver");
+        
+        Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/mydb?characterEncoding=GBK","root","");
+        
+        Statement state = conn.createStatement();
+        uid=uid.replace("\'", "\"");//替换单双引号
+        String sql = "select * from users where user ='"+uid+"' and password ='"+pwd+"' ";
+        ResultSet rs = state.executeQuery(sql);
+        boolean ok = rs.next();
+        if(ok){
+            System.out.println("欢迎"+rs.getString(3)+"回来");
+        }
+        else{
+            System.out.println("您输入的账号密码错误");
+        }
+        
+        conn.close();
+
+    }
+

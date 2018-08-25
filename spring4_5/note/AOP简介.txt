@@ -1,0 +1,91 @@
+	
+	
+	AOP：java社区里最完整最流行的AOP框架，在spring2.0以上版本中，可以使用基于AjpectJ注解或
+		  基于XML的形式配置AOP
+	
+		AOP当中的几个重要概念：		
+		1、切面（Aspect）：横切关注点的模块化（抽象），具有相同功能的横切关注点可以抽象成一个切面
+		       例子：pointcut = ""
+		
+		2、横切关注点：业务处理当中，不同业务的分离点
+		
+		3、通知：切面必须要完成的工作
+		       例子：before(),beforeAll(),after()
+		
+		4、目标：被通知的对象（被代理的对象）
+		
+		5、代理对象
+		
+		6、连接点：横切关注点的另外一种表达形式，共同业务和核心业务分离的点，（前置处理，后置处理，异常处理）
+		       例子："execution(public int com.spring.proxy.ComputerImp.add(int, int))"
+		
+		7、切点：可以通过切点定位到某一个特定的连接点
+		
+		
+	通过AspectJ框架标注进行aop的配置
+	
+		前提：导入相应的jar包，勾选命名空间aop
+	
+		1、需要对切面类进行Aspect标注
+		
+		2、共同的业务加入到切面，共同业务的方法
+		
+		3、前置通知，后置通知，例如：
+			@Before("execution(public * com.spring.proxy.ComputerImp.*(..))")
+			不限定返回类型，不限定方法，不限定参数列表
+			
+		4、在spring配置文件当中加入标签：
+			<aop:aspectj-autoproxy></aop:aspectj-autoproxy>
+		  	<context:component-scan base-package="com.spring.proxy"></context:component-scan>
+	
+		5、需要对切面类，目标对象进行IoC容器的监管：加上@Component标注	
+		
+		6、测试
+		
+		
+	通知类型
+	
+		前置通知：@Before("execution(public * com.spring.proxy.ComputerImp.*(..))")
+		
+		后置通知：@After("execution(public int com.spring.proxy.ComputerImp.*(..))")
+		
+		返回通知：@AfterReturning(pointcut = "execution(public int com.spring.proxy.ComputerImp.*(..))", returning = "result")
+		
+		异常通知：@AfterThrowing(pointcut = "execution(public int com.spring.proxy.ComputerImp.*(..))", throwing = "ex")
+		
+		环绕通知：@Around("execution(public int com.spring.proxy.ComputerImp.*(..))")
+		
+		
+	切面的优先级
+	
+		使用注解方式实现切面优先级：@Order(0)来确定切面的优先级，Order当中的值越小，优先级越高
+		
+		实现接口方式实现切面优先级：implements Ordered（import org.springframework.core.Ordered;）
+						         实现getOrder()方法，返回值越小，优先级越高
+		
+	
+	
+	切点表达式：
+		
+		
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	重用切点表达式
+	
+		@Pointcut("execution(public * com.spring.proxy.ComputerImp.*(..))")
+		public void getExecution() {
+	
+		}
+		
+		方法当中没有方法体
+		
+		调用的形式为：@After("getExecution()")
+		
+	

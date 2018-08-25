@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:p="http://www.springframework.org/schema/p" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd">
+
+	<!-- 获取bean实例，相当于注解中的：@Component -->
+	<bean id="computerImp" class="com.spring.proxy.ComputerImp"></bean>
+	<bean id="aspect" class="com.spring.proxy.AOP_AspectJ"></bean>
+
+	<!-- 自动扫描 -->
+	<context:component-scan base-package="com.spring.annotation"></context:component-scan>
+	<context:component-scan base-package="com.spring.car"></context:component-scan>
+
+	<aop:config>
+
+		<!-- 重用切入点，相当于注解中的：@Pointcut() -->
+		<!-- 放在config内部，作用域为全部aspect，放在aspect内部，只针对哪一个aspect -->
+		<aop:pointcut
+			expression="execution(public int com.spring.proxy.ComputerImp.*(..))"
+			id="pointcut_01" />
+
+		<!-- 创建一个切面，相当于注解中的：@Aspect -->
+		<aop:aspect id="aspect" ref="aspect">
+
+			<!-- 前置通知 -->
+			<aop:before method="beforeAll"
+				pointcut="execution(public int com.spring.proxy.ComputerImp.*(..))" />
+			<!-- 后置通知 -->
+			<aop:after method="afterAll" pointcut-ref="pointcut_01" />
+		</aop:aspect>
+
+	</aop:config>
+</beans>

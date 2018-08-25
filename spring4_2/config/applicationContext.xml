@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd">
+
+
+
+	<!-- bean中注入list集合属性，使用内部bean -->
+	<bean id="person_01" class="com.spring.beans.Person" autowire="default">
+		<property name="name" value="tom"></property>
+		<property name="age" value="22"></property>
+		<property name="cars">
+			<list>
+				<bean class="com.spring.beans.Car" p:type="奔驰s320" p:factory="沈阳汽车制造成"
+					p:price="868000.00D">
+				</bean>
+				<bean class="com.spring.beans.Car" p:type="奔驰s350" p:factory="沈阳汽车制造成"
+					p:price="1068000.00D">
+				</bean>
+				<bean class="com.spring.beans.Car">
+					<property name="type" value="奔驰s450"></property>
+					<property name="factory" value="沈阳汽车制造成"></property>
+					<property name="price" value="1198000.00D"></property>
+				</bean>
+			</list>
+		</property>
+	</bean>
+
+
+
+	<!-- 
+		使用标签来完成bean中注入List，Map集合属性，使用外部bean 
+		使用p命名空间来完成属性的注入
+		p可以想象为当前bean对象
+	-->
+	<bean id="car_01" class="com.spring.beans.Car" p:type="奔驰s320"
+		p:factory="沈阳汽车制造成" p:price="868000.00D">
+	</bean>
+	<bean id="car_02" class="com.spring.beans.Car" p:type="奔驰s350"
+		p:factory="沈阳汽车制造成" p:price="1068000.00D">
+	</bean>
+
+	
+
+	<bean id="person_02" class="com.spring.beans.Person">
+		<property name="name" value="tom"></property>
+		<property name="age" value="22"></property>
+		<!-- List集合car对象注入，内部list，只能被当前bean使用 -->
+		<property name="cars">
+			<list>
+				<ref bean="car_01" />
+				<ref bean="car_02" />
+			</list>
+		</property>
+		<property name="info">
+			<list>
+				<value>tom is smart</value>
+				<value>he want to buy a car</value>
+			</list>
+		</property>
+		<property name="maps">
+			<map>
+				<entry key="ref_01" value-ref="car_01"></entry>
+				<entry key="ref_02" value-ref="car_02"></entry>
+			</map>
+		</property>
+	</bean>
+
+
+
+	<!-- 外部list的使用，p命名空间的使用 -->
+	<util:list id="listCar">
+		<ref bean="car_01" />
+		<ref bean="car_02" />
+	</util:list>
+	<bean id="person_03" class="com.spring.beans.Person" p:name="tom"
+		p:age="22" p:cars-ref="listCar">
+	</bean>
+	
+	
+
+	<!-- 继承bean -->
+	<bean id="person_05" parent="person_03" p:name="keven"></bean>
+
+
+
+	<!-- 定义一个抽象bean -->
+	<bean id="abstractPerson" abstract="true" class="com.spring.beans.Person"
+		p:name="steven" p:age="21"></bean>
+	<!-- 继承抽象bean，并且配置依赖关系（依赖的bean并没有什么用，此处只是举例） -->
+	<bean id="person_06" parent="abstractPerson" depends-on="person_05,person_03"></bean>
+
+
+
+	<!-- 创建一个作用域为prototype的bean -->
+	<bean id="car_03" class="com.spring.beans.Car" p:type="奔驰s320"
+		p:factory="沈阳汽车制造成" p:price="868000.00D" scope="prototype">
+	</bean>
+
+
+
+</beans>

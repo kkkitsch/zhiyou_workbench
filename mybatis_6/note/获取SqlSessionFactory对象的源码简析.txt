@@ -1,0 +1,83 @@
+
+	
+	build()方法返回的对象是：DefaultSqlSessionFactory，这个类实现了SqlSessionFactory接口
+	
+	
+	
+	new SqlSessionFactoryBuilder().build(inputStream);------------->
+	
+	
+		build(inputStream)------------->
+		
+		
+			public SqlSessionFactory build(InputStream inputStream) {
+			    return build(inputStream, null, null);
+			}------------->
+				
+				
+				public SqlSessionFactory build(InputStream inputStream, String environment, Properties properties) {
+				    try {
+				      XMLConfigBuilder parser = new XMLConfigBuilder(inputStream, environment, properties);
+				      return build(parser.parse());
+				    } catch (Exception e) {  |
+				      ......				 |
+				    } finally {				 |
+				      ......				 |
+				  } ------------->			 |
+			    							 |
+			    							 |
+				    	parse()方法：  			 |
+				    	public Configuration parse() {
+						    if (parsed) {
+						      throw new BuilderException("Each XMLConfigBuilder can only be used once.");
+						    }
+						    parsed = true;
+						    
+						    //这一步是解析所有的配置文件，传入的参数就是全局配置文件的根节点
+						    parseConfiguration(parser.evalNode("/configuration"));
+						    
+						    return configuration;
+						  } ------------->
+						  
+						  
+								parseConfiguration()方法：
+								private void parseConfiguration(XNode root) {
+							    try {
+							      //issue #117 read properties first
+							      
+							      //解析全局配置文件的properties标签
+							      propertiesElement(root.evalNode("properties"));
+							      
+							      Properties settings = settingsAsProperties(root.evalNode("settings"));
+							      ......
+							      
+							      //settings标签
+							      settingsElement(settings);
+							      
+							      ......
+							      
+							      //解析在全局配置文件中配置的mapper标签，解析映射配置文件
+							      mapperElement(root.evalNode("mappers"));
+							      
+							    } catch (Exception e) {
+							      ......
+							    }
+							  }
+									  
+									  
+									  
+									  
+									  
+									  
+									  
+									  
+									  
+									  
+									  
+									  
+									  
+									  
+									  
+									  
+									  
+									  

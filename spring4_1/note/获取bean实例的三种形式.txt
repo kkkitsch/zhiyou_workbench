@@ -1,0 +1,11 @@
+
+
+	1、Object getBean(String) String:id的值
+		Dog dog = (Dog) ac.getBean("dog_01");
+	
+	2、getBean(Class)
+		Dog dog = ac.getBean(Dog.class);
+	
+	3、getBean(String,Class)
+		Dog dog = ac.getBean("dog_01", Dog.class);
+ 

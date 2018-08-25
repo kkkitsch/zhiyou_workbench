@@ -1,0 +1,113 @@
+
+	首先获取SqlSessionFactory对象：
+		public SqlSessionFactory build(Configuration config) {
+		    return new DefaultSqlSessionFactory(config);------------->
+		  }
+
+
+		通过	DefaultSqlSessionFactory 的openSession()方法调用openSessionFromDataSource()方法：
+		
+			 public SqlSession openSession() {
+			    return openSessionFromDataSource(configuration.getDefaultExecutorType(), null, false);------------->
+			  }
+	
+	
+			openSessionFromDataSource()方法：
+			
+			  private SqlSession openSessionFromDataSource(ExecutorType execType, TransactionIsolationLevel level, boolean autoCommit) {
+			    Transaction tx = null;
+			    try {
+			    
+			      //获取全局配置文件中environment中的相关信息
+			      final Environment environment = configuration.getEnvironment();
+			      final TransactionFactory transactionFactory = getTransactionFactoryFromEnvironment(environment);
+			      
+			      //包含了事务管理的配置
+			      tx = transactionFactory.newTransaction(environment.getDataSource(), level, autoCommit);
+			      
+			      //返回执行器的实例，包含了事务管理实例，和执行器类型
+			      final Executor executor = configuration.newExecutor(tx, execType);------------->
+			      
+			      //这一步，返回SqlSession的实现类：DefaultSqlSession，DefaultSqlSession包含了配置文件的信息，execoter执行器的信息，和是否自动提交的信息
+			      return new DefaultSqlSession(configuration, executor, autoCommit);
+			      
+			    } catch (Exception e) {
+			      ......
+			    } finally {
+			      ......
+			    }
+			  }	
+
+			
+			
+				返回执行器实例的方法：configuration.newExecutor(tx, execType);
+				
+				public Executor newExecutor(Transaction transaction, ExecutorType executorType) {
+				    executorType = executorType == null ? defaultExecutorType : executorType;
+				    executorType = executorType == null ? ExecutorType.SIMPLE : executorType;
+				    Executor executor;
+				    
+				    //判断执行器的类型，返回相应的类型
+				    if (ExecutorType.BATCH == executorType) {
+				      executor = new BatchExecutor(this, transaction);
+				    } else if (ExecutorType.REUSE == executorType) {
+				      executor = new ReuseExecutor(this, transaction);
+				    } else {
+				      executor = new SimpleExecutor(this, transaction);
+				    }
+				    
+				    //二级缓存
+				    if (cacheEnabled) {
+				      executor = new CachingExecutor(executor);
+				    }
+				    
+				    //拦截器链，添加插件
+				    executor = (Executor) interceptorChain.pluginAll(executor);
+				    return executor;
+				  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

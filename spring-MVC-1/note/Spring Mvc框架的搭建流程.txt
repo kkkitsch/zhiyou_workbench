@@ -1,0 +1,42 @@
+Spring Mvc框架的搭建：
+
+	1、jar包
+	
+	2、springDispatcherServlet的配置
+	
+		springDispatcherServlet的配置可以使用插件sts来完成 :
+	
+		注意事项：
+			初始化参数：告知当前 springmvc的配置文件路径
+			<init-param>
+				<param-name>contextConfigLocation</param-name>
+				<param-value>classpath:springmvc.xml</param-value>
+			</init-param>
+			
+			配置当前servlet映射，url-pattern修改为：/
+			<servlet-mapping>
+				<servlet-name>springDispatcherServlet</servlet-name>
+				<url-pattern>/</url-pattern>
+			</servlet-mapping>
+			
+	3、配置spingmvc.xml文件：必须与web.xml文件当中DispatcherServlet的配置的初始化参数一致
+		
+		注意事项：
+			自动扫描包：<context:component-scan base-package="com.springmvc.handler"></context:component-scan>
+			
+			需要配置一个bean：视图解析器，逻辑视图 解析为物理视图：
+			<bean
+				class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+				<!-- 逻辑视图：hello 解析为物理视图：/hello.jsp -->
+				<property name="prefix" value="/"></property>
+				<property name="suffix" value=".jsp"></property>
+			</bean>
+			
+			
+	4、配置控制器：
+		
+		任何的javabean都可以作为一个控制器：@Controller 
+		
+		方法的返回值：当前业务的方法处理完毕之后，跳转web资源（逻辑视图的名称）
+	
+		

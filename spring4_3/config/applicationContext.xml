@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:p="http://www.springframework.org/schema/p" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd">
+
+
+
+	<bean id="car_01" class="com.spring.beans.Car" p:type="奥拓"
+		p:factory="大连重工" p:price="33333.33D"></bean>
+	<bean id="car_02" class="com.spring.beans.Car" p:type="大众"
+		p:factory="大连重工" p:price="66666.66D"></bean>
+	<bean id="cars" class="com.spring.beans.Car" p:type="马自达"
+		p:factory="大连重工" p:price="55555.55D"></bean>
+
+
+
+	<!-- 自动装配 -->
+	<bean id="person_01" class="com.spring.beans.Person" autowire="byType"></bean>
+	<bean id="person_02" class="com.spring.beans.Person" autowire="byName"></bean>
+
+
+
+	<!-- 使用外部属性文件进行bean属性值的注入 -->
+	<context:property-placeholder location="person.properties" />
+	<bean id="person_03" class="com.spring.beans.Person" p:name="${personName}"
+		p:age="${personAge}"></bean>
+
+
+
+	<!-- 使用SpringEL表达式 -->
+	<util:list id="listCar">
+		<ref bean="car_01" />
+		<ref bean="car_02" />
+	</util:list>
+	<util:list id="listInfo">
+		<value>#{person_05.age +10>21?true:false}</value>
+		<value>#{'这是SpringEL表达式赋的值'}</value>
+		<value>#{T(java.lang.Math).PI * 80 * 2}</value>
+		<value> #{person_05.age matches
+			'[a-zA-Z0-9._%+_]+@[a-zA-Z0-9.-]+\\.com'}"</value>
+	</util:list>
+	<bean id="person_05" class="com.spring.beans.Person">
+		<property name="name" value="tom"></property>
+		<property name="age" value="12"></property>
+		<property name="cars" value="#{listCar}"></property>
+	</bean>
+	<bean id="person_06" class="com.spring.beans.Person">
+		<property name="name" value="#{person_05.name.toUpperCase()}"></property>
+		<property name="age" value="#{person_05.age +10}"></property>
+		<property name="cars" value="#{person_05.cars}"></property>
+		<property name="info" value="#{listInfo}"></property>
+	</bean>
+
+
+
+	<!-- 初始化方法，销毁方法 -->
+	<bean id="myBeanPostProcessor" class="com.spring.beanprocessor.MyBeanProcessor"></bean>
+	<bean id="person_07" class="com.spring.beans.Person" p:name="大黄"
+		p:age="6" p:cars-ref="car_01" init-method="init" destroy-method="destroy"></bean>
+
+
+
+	<!-- 包含静态工厂方法的类 -->
+	<bean id="dateFormat" class="java.text.DateFormat" factory-method="getDateInstance">
+		<constructor-arg value="2"></constructor-arg>
+	</bean>
+	<!-- 包含实例工厂方法的类 -->
+	<bean id="simpleDateFormat" class="java.text.SimpleDateFormat">
+		<constructor-arg value="yyyy-MM-dd hh-mm-ss"></constructor-arg>
+	</bean>
+	<!-- parse()返回的数据类型为Date -->
+	<bean id="date" factory-bean="simpleDateFormat" factory-method="parse">
+		<constructor-arg value="2018-4-11 19-36-29"></constructor-arg>
+	</bean>
+	
+	
+
+	<!-- 通过FactoryBean接口配置bean -->
+	<bean id="factoryBean" class="com.spring.factory.FactoryBean"></bean>
+
+
+
+</beans>

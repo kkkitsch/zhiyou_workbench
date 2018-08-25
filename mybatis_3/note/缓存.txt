@@ -1,0 +1,105 @@
+
+	
+	
+一级缓存失效的四种情况：
+	1、SqlSession不同
+	2、SqlSession相同，检索条件不同，比如说，第一次查询1号员工信息，第二次查询2号员工信息
+	3、SqlSession相同，检索条件相同，但两次检索条件之间进行了增删改操作
+	4、SqlSession相同，检索条件相同，但两次检索条件之间进行了清除缓存
+	
+	
+	
+	
+	
+	
+二级缓存
+
+	默认不开启，开启的步骤为：
+		1、在全局配置文件中设置：		<setting name="cacheEnabled" value="true"/>
+		2、在映射配置文件中开启cache：	<cache />
+		3、在bean中实现序列化接口：		java.io.Serializable
+		
+	二级缓存是基于namespace级别的缓存，一个namespace对应一个二级缓存
+	工作机制：
+		1、一个会话，查询的数据会被放在当前会话的一级缓存中
+		2、如果会话关闭，一级缓存中的数据会被保存到二级缓存中，新的会话查询相同的信息，可以参照二级缓存
+		3、不同namespace查处的数据会放在自己对应的缓存中
+		
+		
+其他
+	当全局配置文件中配置：<setting name="cacheEnabled" value="false" />时，
+	关闭的是二级缓存，一级缓存仍然有效
+	
+	当全局配置文件中配置：<setting name="cacheEnabled" value="true" />时，
+	二级缓存有效，但是我想让某个查询sql的二级缓存失效，怎么办呢？
+	在标签中配置属性：useCache="true" 即可，这时，一级缓存仍然有效，二级缓存失效（即使在全局
+	配置文件中配置了使用缓存的setting）	
+	
+	为什么在执行了增删改操作后，缓存会失效？
+	原因是因为在增删改的标签中，有默认属性为：flushCache="true"，当执行增删改操作后，不论一级缓存
+	还是二级缓存都被清空了	
+		
+	在查询标签中，有默认属性为：flushCache="false"
+	
+	清除缓存的方法：session.clearCache()，只会清除一级缓存，不会清除二级缓存
+		
+		
+		
+		
+		
+  
+  
+二级缓存实例解释：
+	在第一次查询出user的信息后，必须在第二次查询user信息之前关闭session，这样才能在
+	第二次查询时使用上二级缓存，原因就是，只有在提交session或关闭session后，一级缓存
+	中的数据才会被保存到二级缓存中（namespace中），如果还没存到二级缓存中，就从别的session
+	中查询，肯定要重新发送sql查询语句呀
+  
+	@Test
+	public void testTwoCache() {
+		SqlSession session = factory.openSession();
+		SqlSession session2 = factory.openSession();
+		try {
+			UserMapper mapper = session.getMapper(UserMapper.class);
+			User user = mapper.getUserById(1);
+			logger.info("查询成功,获取的数据为：{}", user);
+	
+			MybatisUtils.close(session);
+	
+			// 进行第二次查询
+			mapper = session2.getMapper(UserMapper.class);
+			User user2 = mapper.getUserById(1);
+			logger.info("查询成功,获取的数据为：{}", user2);
+			MybatisUtils.close(session2);
+		} catch (Exception e) {
+			logger.info("查询失败");
+		}
+	}
+  
+  
+  
+  
+  
+  
+引用第三方缓存
+	mybatis自带的缓存并不强大，可以引用第三方的缓存，使与数据库的交互效率更高
+	引用第三方缓存，只需实现接口：org.apache.ibatis.cache.Cache 即可
+	
+	使用第三方缓存步骤：
+		1、在mybatis的github官网中，找到自己要整合的第三方适配的jar包和源码
+		2、引入依赖包和适配包
+		3、如果第三方缓存为ehcache，引入ehcache.xml文件
+		4、在映射配置文件中配置：<cache type="org.mybatis.caches.ehcache.EhcacheCache"></cache>
+		5、整合完毕
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+	

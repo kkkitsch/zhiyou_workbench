@@ -1,0 +1,2 @@
+this is a string ,which is write to file
+this is a string ,which is write to file

@@ -1,0 +1,721 @@
+
+hibernate.cfg.xml核心配置文件中配置连接池的问题：
+
+		如果不配置连接池，使用自身hibernate自带的连接池，使用日志在控制台输出的信息的摘要：
+			Using Hibernate built-in connection pool (not for production use!)  
+			Hibernate connection pool size: 20 (min=1) 
+			
+		配置连接池，使用c3p0连接池，使用日志在控制台输出的信息的摘要：
+			C3P0 using driver
+			
+		另外，hibernate.properties属性文件中，没有发现定义德鲁伊连接池的配置
+		
+		
+		
+		
+		
+		
+为什么核心配置文件要使用xml的形式，而不使用.properties属性文件的形式
+
+		使用.properties属性文件，那么通过 Configuration config=new Configuration();就可以
+		加载配置文件，但是要手动配置加载映射配置问价，非常麻烦
+		手动加载配置文件：config.addResource("类路径下的映射配置文件");
+		
+		一般开发使用.xml形式的配置文件，通过：
+		Configuration config=new Configuration().configure(new File("config/hibernate.cfg.xml"));
+		加载配置文件
+
+
+
+
+
+
+factory = config.buildSessionFactory();
+
+		执行这一步就会创建或修改表，原因是已经获取了核心配置文件，而核心配置文件中有配置
+		映射配置文件，映射配置文件中有对应关系：javabean和数据库字段的对应，还指定了
+		表名，这样就可以创建表了，自动创建表的前提是在核心配置文件里配置了自动建表语句
+
+
+
+
+
+
+关于SessionFactory接口的一些说明：
+
+		/*
+		 * SessionFactory对象保存了当前的数据库配置信息和所有映射关系以及预定义
+		 * 的sql语句，同时，SessionFactory还负责维护hibernate当中的二级缓存
+		 * 
+		 * 使用Configuration类创建了SessionFactory对象时，已经在SessionFactory 对象中缓存了一些常见的sql语句
+		 * 
+		 * 一个SessionFactory对应一个数据库，应从该对象中获取Session连接对象实例
+		 * 
+		 * SessionFactory是线程安全的，意味着它的一个实例可以被多个线程共享
+		 * 
+		 * SessionFactory是重量级的，意味着你不能随意创建或销毁它的实例，如果只访问一个数据库，
+		 * 只需要创建一个SessionFactory实例，且在应用初始化的时候完成
+		 * 
+		 * SessionFactory需要一个较大的缓存，用来存放预定义的sql语句，以及实体的映射信息，另外，可以配置
+		 * 一个缓存插件，这个插件被称为hibernate的二级缓存，被多线程共享
+		 */
+
+		 
+		 
+		 
+		 
+关于Session接口的一些说明：
+		
+		/*
+		 * Session是在hibernate中使用最频繁的接口，也被称为持久化管理器，它提供了和 持久化有关的的操作，比如CRUD实体对象
+		 * 
+		 * Session是应用程序与数据库之间交互操作的一个单线程对象，是hibernate运作的中心
+		 * 
+		 * Session是线程不安全的，应避免多个线程使用同一个Session实例
+		 * 
+		 * 所有持久化对象必须在session的管理下才可以进行持久化操作
+		 * 
+		 * Session对象有一个一级缓存，显式执行flush清除刷新之前，所有的持久化操作的数据都缓存在session对象处
+		 * 
+		 * 持久化类与Session关联之后就有了持久化的能力
+		 */
+		 
+		 
+		 
+
+		 
+关于Transaction接口的一些说明：
+
+		/*
+		 * hibernate框架默认情况下事务不自动提交，需要手动提交事务
+		 * 
+		 * 如果没有开启事务，那么每个Session的操作，都相当于一个独立的事务
+		 *
+		 * 持久化对象在内存中占用着空间，分为缓存区和快照区，快照区相当于缓存区的副本，当进行更新
+		 * 数据的时候，会把缓存区中的数据更新，提交的时候使用快照机制
+		 *
+		 * 快照机制：当执行提交操作时，hibernate框架去比较缓存区和快照区的
+		 * 内容，如果一致，不做任何操作，如果不一致，把缓存区的数据更新到数据库
+		 * 同时把缓存区的数据更新到快照区，这就是session.update()可以忽略不写的原因
+		 */
+		 
+		 
+
+		 
+关于hibernate当中缓存的一些说明：
+	
+		/*
+		 * 什么是缓存：
+		 * 
+		 * 		 在一块内存空间，将数据源（数据库或者文件）中的数据存放在缓存当中，再次获取的时候，
+		 * 		直接从缓存当中获取，而不是从数据源取数据，可以提升程序性能
+		 * 
+		 * 
+		 * hibernate框架提供的两种缓存： 
+		 * 
+		 * 		一级缓存：一级缓存的生命周期与Session对象一致，一级缓存称为Session级别的缓存
+		 * 		二级缓存：默认没有开启，需要手动配置才可以使用，二级缓存可以在多个Session对象中共享数据，
+		 * 				 二级缓存称为SessionFactory级别的缓存
+		 * 
+		 * 
+		 * session对象的缓存概述：
+		 * 
+		 * 		Session接口中，有一系列的java集合，这些java集合构成了Session级别的缓存，将对象存放到一
+		 * 		级缓存中，Session的生命周期没有结束，那么对象就在Session中存放着
+		 */
+		 
+		 
+		 
+		 
+		 
+		 
+		 
+以下为多表操作，每次进行添加操作时，添加一条客户信息，两条联系人信息：		 
+		 
+		 
+		 
+双向关联，进行添加操作，在控制台打印的日志信息：
+
+	日志：
+	    insert 
+	    into
+	        customer
+	        (cust_name, cust_level, cust_linkman, cust_phone, cust_mobile, cust_address) 
+	    values
+	        (?, ?, ?, ?, ?, ?)
+	        
+	    insert 
+	    into
+	        linkman
+	        (lkm_name, lkm_gender, lkm_phone, lkm_mobile, lkm_email, lkm_qq, lkm_position, lkm_memo, lkm_cust_id) 
+	    values
+	        (?, ?, ?, ?, ?, ?, ?, ?, ?)
+	        
+	    insert 
+	    into
+	        linkman
+	        (lkm_name, lkm_gender, lkm_phone, lkm_mobile, lkm_email, lkm_qq, lkm_position, lkm_memo, lkm_cust_id) 
+	    values
+	        (?, ?, ?, ?, ?, ?, ?, ?, ?)
+	        
+	    update
+	        linkman 
+	    set
+	        lkm_cust_id=? 
+	    where
+	        lkm_id=?
+	        
+	    update
+	        linkman 
+	    set
+	        lkm_cust_id=? 
+	    where
+	        lkm_id=?
+	        
+		说明：此时，控制台一共打印5条sql语句
+		 
+		 
+		 
+		
+		
+
+cascade 可配置的属性值：
+
+		none -- 不使用级联
+		save-update -- 级联保存或更新
+		delete -- 级联删除
+		delete-orphan -- 孤儿删除.(注意：只能应用在一对多关系)
+		all -- 除了delete-orphan的所有情况.（包含save-update delete）
+		all-delete-orphan -- 包含了delete-orphan的所有情况.（包含save-update delete delete-orphan）
+
+
+
+
+
+session.save(object); :  这条sql语句的作用就是让object和session对象关联，把object数据存放到session缓存
+当中，而在单向关联中，只关联了其中一方的对象，另一方的对象没有被关联，是瞬态的，所以另一方的对象在session创造的缓存区
+当中并不存在，当进行tr.commit()提交操作时，session缓存无法进行比较，会报错提示无法保存瞬态实例，
+而cascade="save-update"的作用就是告诉session可以保存瞬态实例
+在单项关联中，Session对象保存的是 ‘哪一方’ ，cascade="save-update" 就配置在 ‘哪一方’ 的映射配置文件中
+
+
+
+单向关联：客户关联联系人，不在客户的映射配置文件 Customer.hbm.xml 中配置  cascade="save-update" 出现的情况，以及打印的日志信息：
+
+	日志：
+	    insert 
+	    into
+	        customer
+	        (cust_name, cust_level, cust_linkman, cust_phone, cust_mobile, cust_address) 
+	    values
+	        (?, ?, ?, ?, ?, ?)
+	        
+	    update
+	        linkman 
+	    set
+	        lkm_cust_id=? 
+	    where
+	        lkm_id=?
+	        
+	        
+	    java.lang.IllegalStateException: org.hibernate.TransientObjectException: object references an unsaved transient instance 
+	    - save the transient instance before flushing: com.zhiyou.bean.LinkMan
+	    
+	    
+		说明： 可发现，前期插入数据没有问题，在后期，进行更新操作，更新数据时，要用到快照机制，这时，更新LinkMan数据，设置外键的时候，和内存中的数据做对比，
+		这时，发现内存中没有可比较的数据，所以报出以上的错误：对象引用一个为保存的瞬态实例，在刷新com.zhiyou.bean.LinkMan之前，保存瞬态实例
+		
+		
+		在  ‘一方’ 配置 cascade=save-update 后，可保存瞬态数据到数据库，此时，控制台打印的日志信息：
+		
+		insert 
+	    into
+	        customer
+	        (cust_name, cust_level, cust_linkman, cust_phone, cust_mobile, cust_address) 
+	    values
+	        (?, ?, ?, ?, ?, ?)
+	        
+	    insert 
+	    into
+	        linkman
+	        (lkm_name, lkm_gender, lkm_phone, lkm_mobile, lkm_email, lkm_qq, lkm_position, lkm_memo, lkm_cust_id) 
+	    values
+	        (?, ?, ?, ?, ?, ?, ?, ?, ?)
+	        
+	    insert 
+	    into
+	        linkman
+	        (lkm_name, lkm_gender, lkm_phone, lkm_mobile, lkm_email, lkm_qq, lkm_position, lkm_memo, lkm_cust_id) 
+	    values
+	        (?, ?, ?, ?, ?, ?, ?, ?, ?)
+	        
+	    update
+	        linkman 
+	    set
+	        lkm_cust_id=? 
+	    where
+	        lkm_id=?
+	        
+	    update
+	        linkman 
+	    set
+	        lkm_cust_id=? 
+	    where
+	        lkm_id=?
+		
+		说明：此时，控制台一共打印5条sql语句
+			
+			
+			
+			
+单向关联：联系人关联客户，在联系人的映射配置文件 LinkMan.hbm.xml 中配置  cascade="save-update" 打印的日志信息：
+
+	日志：
+		insert 
+	    into
+	        customer
+	        (cust_name, cust_level, cust_linkman, cust_phone, cust_mobile, cust_address) 
+	    values
+	        (?, ?, ?, ?, ?, ?)
+	        
+	    insert 
+	    into
+	        linkman
+	        (lkm_name, lkm_gender, lkm_phone, lkm_mobile, lkm_email, lkm_qq, lkm_position, lkm_memo, lkm_cust_id) 
+	    values
+	        (?, ?, ?, ?, ?, ?, ?, ?, ?)
+	        
+	    insert 
+	    into
+	        linkman
+	        (lkm_name, lkm_gender, lkm_phone, lkm_mobile, lkm_email, lkm_qq, lkm_position, lkm_memo, lkm_cust_id) 
+	    values
+	        (?, ?, ?, ?, ?, ?, ?, ?, ?)
+	        
+	         说明：此时，控制台一共打印3条sql语句
+	         分析可知，在单项关联中，把 cascade="save-update" 配置在多方，可以减少sql语句的执行，进而提高效率
+		         
+		         
+		         
+		         
+		         
+		         
+删除客户，在 ‘一方’ 不配置 cascade="delete" ，执行的代码，控制台打印的日志信息：
+
+	代码：
+		Customer customer = session.get(Customer.class, 45L);
+		session.delete(customer);
+		
+	日志：
+		select
+        customer0_.cust_id as cust_id1_0_0_,
+        customer0_.cust_name as cust_nam2_0_0_,
+        customer0_.cust_level as cust_lev3_0_0_,
+        customer0_.cust_linkman as cust_lin4_0_0_,
+        customer0_.cust_phone as cust_pho5_0_0_,
+        customer0_.cust_mobile as cust_mob6_0_0_,
+        customer0_.cust_address as cust_add7_0_0_ 
+	    from
+	        customer customer0_ 
+	    where
+	        customer0_.cust_id=?
+	        
+	    update
+	        linkman 
+	    set
+	        lkm_cust_id=null 
+	    where
+	        lkm_cust_id=?
+	        
+	    delete 
+	    from
+	        customer 
+	    where
+	        cust_id=?
+		         
+		说明：当进行删除操作时，首先把外键的值设为null：  set lkm_cust_id=null 
+		让表之间不再有外键约束，这样删除数据，只把customer中的数据被删除，
+		同时，LinkMan中的外键设为null，linkman表中的两条数据的其他字段值
+		依然存在，这样删除的不彻底
+		
+		
+		
+		
+删除客户，在 ‘一方’ 配置 cascade="delete" ，执行的代码，控制台打印的日志信息：
+		
+	代码：
+		Customer customer = session.get(Customer.class, 45L);
+		session.delete(customer);
+		
+	日志：	         
+		select
+        customer0_.cust_id as cust_id1_0_0_,
+        customer0_.cust_name as cust_nam2_0_0_,
+        customer0_.cust_level as cust_lev3_0_0_,
+        customer0_.cust_linkman as cust_lin4_0_0_,
+        customer0_.cust_phone as cust_pho5_0_0_,
+        customer0_.cust_mobile as cust_mob6_0_0_,
+        customer0_.cust_address as cust_add7_0_0_ 
+	    from
+	        customer customer0_ 
+	    where
+	        customer0_.cust_id=?
+	        
+	    select
+        linkmans0_.lkm_cust_id as lkm_cus10_1_0_,
+        linkmans0_.lkm_id as lkm_id1_1_0_,
+        linkmans0_.lkm_id as lkm_id1_1_1_,
+        linkmans0_.lkm_name as lkm_name2_1_1_,
+        linkmans0_.lkm_gender as lkm_gend3_1_1_,
+        linkmans0_.lkm_phone as lkm_phon4_1_1_,
+        linkmans0_.lkm_mobile as lkm_mobi5_1_1_,
+        linkmans0_.lkm_email as lkm_emai6_1_1_,
+        linkmans0_.lkm_qq as lkm_qq7_1_1_,
+        linkmans0_.lkm_position as lkm_posi8_1_1_,
+        linkmans0_.lkm_memo as lkm_memo9_1_1_,
+        linkmans0_.lkm_cust_id as lkm_cus10_1_1_ 
+	    from
+	        linkman linkmans0_ 
+	    where
+	        linkmans0_.lkm_cust_id=?
+
+	    update
+	        linkman 
+	    set
+	        lkm_cust_id=null 
+	    where
+	        lkm_cust_id=?
+	        
+	    delete 
+	    from
+	        linkman 
+	    where
+	        lkm_id=?
+	        
+	    delete 
+	    from
+	        linkman 
+	    where
+	        lkm_id=?
+	        
+	    delete 
+	    from
+	        customer 
+	    where
+	        cust_id=?         
+	        
+	        
+		说明：当进行删除操作时，首先把外键的值设为null：  set lkm_cust_id=null 
+		让表之间不再有外键约束，这样删除数据，customer中的数据被删除，
+		同时，LinkMan表中的两条记录也被删除，这样删除的彻底
+		
+		
+		
+		
+		
+删除联系人，在 ‘多方’ 配置 cascade="delete" ，执行的代码，控制台打印的日志信息：
+
+	代码：
+		LinkMan man = session.get(LinkMan.class, 44);
+		session.delete(man);
+		
+	日志：
+		select
+        linkman0_.lkm_id as lkm_id1_1_0_,
+        linkman0_.lkm_name as lkm_name2_1_0_,
+        linkman0_.lkm_gender as lkm_gend3_1_0_,
+        linkman0_.lkm_phone as lkm_phon4_1_0_,
+        linkman0_.lkm_mobile as lkm_mobi5_1_0_,
+        linkman0_.lkm_email as lkm_emai6_1_0_,
+        linkman0_.lkm_qq as lkm_qq7_1_0_,
+        linkman0_.lkm_position as lkm_posi8_1_0_,
+        linkman0_.lkm_memo as lkm_memo9_1_0_,
+        linkman0_.lkm_cust_id as lkm_cus10_1_0_ 
+	    from
+	        linkman linkman0_ 
+	    where
+	        linkman0_.lkm_id=?
+	        
+	    select
+	        customer0_.cust_id as cust_id1_0_0_,
+	        customer0_.cust_name as cust_nam2_0_0_,
+	        customer0_.cust_level as cust_lev3_0_0_,
+	        customer0_.cust_linkman as cust_lin4_0_0_,
+	        customer0_.cust_phone as cust_pho5_0_0_,
+	        customer0_.cust_mobile as cust_mob6_0_0_,
+	        customer0_.cust_address as cust_add7_0_0_ 
+	    from
+	        customer customer0_ 
+	    where
+	        customer0_.cust_id=?
+
+	    update
+	        linkman 
+	    set
+	        lkm_cust_id=null 
+	    where
+	        lkm_cust_id=?
+
+	    delete 
+	    from
+	        linkman 
+	    where
+	        lkm_id=?
+
+	    delete 
+	    from
+	        customer 
+	    where 
+	        cust_id=?
+	        
+	         说明：当进行删除操作时，首先把外键的值设为null：  set lkm_cust_id=null 
+		让表之间不再有外键约束，这样删除数据，customer中的数据被删除，
+		但是，LinkMan表中的两条记录只被删除了代码中定义的那一条，这样删除的不彻底
+		
+		对比 cascade="delete" 配置在 ‘一方’ 和 ‘多方’ 可知，当配置在 ‘多方’ ，删除数据时，
+		会产生无用数据，这条数据是无意义的，所以，在配置时，应将 cascade="delete" 配置在 '一方'
+			         
+			         
+			         
+			         
+			         
+			         
+			         
+配置 孤儿删除，将 cascade = "delete-orphan" 配置在 ‘一方’
+			         
+	代码：
+		// 孤儿删除：只是将多方在代码中定义的一条记录删除，其他记录依然在，一方的记录也在
+		@Test
+		public void delete2() {
+	
+			// 创建一个客户
+			Customer customer = session.get(Customer.class, 49L);
+			System.out.println(customer);
+	
+			// 创建一个和客户有联系的联系人
+			LinkMan man = session.get(LinkMan.class, 46);
+	
+			// 将这个联系人和客户的关系移除
+			customer.getLinkMans().remove(man);
+	
+			// 解除关系，使用了快照机制
+		}			         
+				         
+	日志：
+	
+		select
+        customer0_.cust_id as cust_id1_0_0_,
+        customer0_.cust_name as cust_nam2_0_0_,
+        customer0_.cust_level as cust_lev3_0_0_,
+        customer0_.cust_linkman as cust_lin4_0_0_,
+        customer0_.cust_phone as cust_pho5_0_0_,
+        customer0_.cust_mobile as cust_mob6_0_0_,
+	        customer0_.cust_address as cust_add7_0_0_ 
+	    from
+	        customer customer0_ 
+	    where
+	        customer0_.cust_id=?
+	        
+	    select
+	        linkmans0_.lkm_cust_id as lkm_cus10_1_0_,
+	        linkmans0_.lkm_id as lkm_id1_1_0_,
+	        linkmans0_.lkm_id as lkm_id1_1_1_,
+	        linkmans0_.lkm_name as lkm_name2_1_1_,
+	        linkmans0_.lkm_gender as lkm_gend3_1_1_,
+	        linkmans0_.lkm_phone as lkm_phon4_1_1_,
+	        linkmans0_.lkm_mobile as lkm_mobi5_1_1_,
+	        linkmans0_.lkm_email as lkm_emai6_1_1_,
+	        linkmans0_.lkm_qq as lkm_qq7_1_1_,
+	        linkmans0_.lkm_position as lkm_posi8_1_1_,
+	        linkmans0_.lkm_memo as lkm_memo9_1_1_,
+	        linkmans0_.lkm_cust_id as lkm_cus10_1_1_ 
+	    from
+	        linkman linkmans0_ 
+	    where
+        linkmans0_.lkm_cust_id=?
+		
+	    update
+	        linkman 
+	    set
+	        lkm_cust_id=null 
+	    where
+	        lkm_cust_id=? 
+	        and lkm_id=?
+	        
+	    delete 
+	    from
+	        linkman 
+	    where
+	        lkm_id=?
+				         
+		可发现，只是 ‘多方’ 的一条记录被删除，另一条依然在， ‘一方’ 的记录也在，同时，
+		使用了update sql语句，说明进行了快照机制
+			         
+			         
+			         
+			         
+			         
+不使用 inverse="true" ,让customer表和linkman表中的数据进行双向关联时，控制台打印的日志信息：
+
+	日志：
+	    select
+        customer0_.cust_id as cust_id1_0_0_,
+        customer0_.cust_name as cust_nam2_0_0_,
+        customer0_.cust_level as cust_lev3_0_0_,
+        customer0_.cust_linkman as cust_lin4_0_0_,
+        customer0_.cust_phone as cust_pho5_0_0_,
+        customer0_.cust_mobile as cust_mob6_0_0_,
+        customer0_.cust_address as cust_add7_0_0_ 
+	    from
+	        customer customer0_ 
+	    where
+	        customer0_.cust_id=?
+
+	    select
+	        linkman0_.lkm_id as lkm_id1_1_0_,
+	        linkman0_.lkm_name as lkm_name2_1_0_,
+	        linkman0_.lkm_gender as lkm_gend3_1_0_,
+	        linkman0_.lkm_phone as lkm_phon4_1_0_,
+	        linkman0_.lkm_mobile as lkm_mobi5_1_0_,
+	        linkman0_.lkm_email as lkm_emai6_1_0_,
+	        linkman0_.lkm_qq as lkm_qq7_1_0_,
+	        linkman0_.lkm_position as lkm_posi8_1_0_,
+	        linkman0_.lkm_memo as lkm_memo9_1_0_,
+	        linkman0_.lkm_cust_id as lkm_cus10_1_0_ 
+	    from
+	        linkman linkman0_ 
+	    where
+	        linkman0_.lkm_id=?
+
+	    select
+	        linkmans0_.lkm_cust_id as lkm_cus10_1_0_,
+	        linkmans0_.lkm_id as lkm_id1_1_0_,
+	        linkmans0_.lkm_id as lkm_id1_1_1_,
+	        linkmans0_.lkm_name as lkm_name2_1_1_,
+	        linkmans0_.lkm_gender as lkm_gend3_1_1_,
+	        linkmans0_.lkm_phone as lkm_phon4_1_1_,
+	        linkmans0_.lkm_mobile as lkm_mobi5_1_1_,
+	        linkmans0_.lkm_email as lkm_emai6_1_1_,
+	        linkmans0_.lkm_qq as lkm_qq7_1_1_,
+	        linkmans0_.lkm_position as lkm_posi8_1_1_,
+	        linkmans0_.lkm_memo as lkm_memo9_1_1_,
+	        linkmans0_.lkm_cust_id as lkm_cus10_1_1_ 
+	    from
+	        linkman linkmans0_ 
+	    where
+	        linkmans0_.lkm_cust_id=?
+
+	    update
+	        linkman 
+	    set
+	        lkm_name=?,
+	        lkm_gender=?,
+	        lkm_phone=?,
+	        lkm_mobile=?,
+	        lkm_email=?,
+	        lkm_qq=?,
+	        lkm_position=?,
+	        lkm_memo=?,
+	        lkm_cust_id=? 
+	    where
+	        lkm_id=?
+
+	    update
+	        linkman 
+	    set
+	        lkm_cust_id=? 
+	    where
+	        lkm_id=?
+			         
+			         
+			         
+		通过控制台打印的信息可发现，在更新linkman表时，customer表和linkman表都进行了更新维护，
+		具体表现在：都根据 lkm_id 重新 set 了 lkm_cust_id=?  
+		这是不必要的，实际上，只需要让其中一方（一般为 ‘多方’）去维护就可以了，所以可以在 ‘一方’
+		配置 inverse=true ，让 ‘一方’ 放弃外键的维护，这样可以减少sql语句的执行，提高效率
+			         
+			         
+			         
+			         
+在Customer.hbm.xml中配置 inverse="true" ,让customer表和linkman表中的数据进行双向关联时，控制台打印的日志信息：			         
+			         
+	日志：
+	    select
+        customer0_.cust_id as cust_id1_0_0_,
+        customer0_.cust_name as cust_nam2_0_0_,
+        customer0_.cust_level as cust_lev3_0_0_,
+        customer0_.cust_linkman as cust_lin4_0_0_,
+        customer0_.cust_phone as cust_pho5_0_0_,
+        customer0_.cust_mobile as cust_mob6_0_0_,
+        customer0_.cust_address as cust_add7_0_0_ 
+	    from
+	        customer customer0_ 
+	    where
+	        customer0_.cust_id=?
+
+	    select
+	        linkman0_.lkm_id as lkm_id1_1_0_,
+	        linkman0_.lkm_name as lkm_name2_1_0_,
+	        linkman0_.lkm_gender as lkm_gend3_1_0_,
+	        linkman0_.lkm_phone as lkm_phon4_1_0_,
+	        linkman0_.lkm_mobile as lkm_mobi5_1_0_,
+	        linkman0_.lkm_email as lkm_emai6_1_0_,
+	        linkman0_.lkm_qq as lkm_qq7_1_0_,
+	        linkman0_.lkm_position as lkm_posi8_1_0_,
+	        linkman0_.lkm_memo as lkm_memo9_1_0_,
+	        linkman0_.lkm_cust_id as lkm_cus10_1_0_ 
+	    from
+	        linkman linkman0_ 
+	    where
+	        linkman0_.lkm_id=?
+
+	    select
+	        linkmans0_.lkm_cust_id as lkm_cus10_1_0_,
+	        linkmans0_.lkm_id as lkm_id1_1_0_,
+	        linkmans0_.lkm_id as lkm_id1_1_1_,
+	        linkmans0_.lkm_name as lkm_name2_1_1_,
+	        linkmans0_.lkm_gender as lkm_gend3_1_1_,
+	        linkmans0_.lkm_phone as lkm_phon4_1_1_,
+	        linkmans0_.lkm_mobile as lkm_mobi5_1_1_,
+	        linkmans0_.lkm_email as lkm_emai6_1_1_,
+	        linkmans0_.lkm_qq as lkm_qq7_1_1_,
+	        linkmans0_.lkm_position as lkm_posi8_1_1_,
+	        linkmans0_.lkm_memo as lkm_memo9_1_1_,
+	        linkmans0_.lkm_cust_id as lkm_cus10_1_1_ 
+	    from
+	        linkman linkmans0_ 
+	    where
+	        linkmans0_.lkm_cust_id=?
+
+	    update
+	        linkman 
+	    set
+	        lkm_name=?,
+	        lkm_gender=?,
+	        lkm_phone=?,
+	        lkm_mobile=?,
+	        lkm_email=?,
+	        lkm_qq=?,
+	        lkm_position=?,
+	        lkm_memo=?,
+	        lkm_cust_id=? 
+	    where
+	        lkm_id=?		         
+		         
+		通过控制台打印的信息可发现，在更新linkman表时，只有linkman表进行了更新维护        
+			         
+			         
+			         
+			         
+经过测试，还发现了其他一些问题：
+	
+	1、hibernate.cfg.xml 命名并不是必须的，可以在config 文件夹中更改成其他名称，例如，现在使用的是： hibernate.xml，在类路径中的hibernate.cfg.xml没有进行测试
+	
+	2、在 ‘一方’ 配置了 cascade="save-update" 之后，就不能配置 inverse ="true" 让 ‘一方’  放弃外键的维护，如果配置，那么在进行单向关联添加数据时，多表中的数据不含有 ‘外键’ 
+	
+	
+	
+	
+	
+	
+	

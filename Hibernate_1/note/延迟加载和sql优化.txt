@@ -1,0 +1,240 @@
+
+不使用延迟加载：
+
+	代码：
+		Customer customer = session.get(Customer.class, 60L);
+		System.out.println(customer.getCust_id());
+
+		System.out.println("------------------------");
+
+		System.out.println(customer.getCust_name());
+	
+	日志：
+	    select
+	        customer0_.cust_id as cust_id1_0_0_,
+	        customer0_.cust_name as cust_nam2_0_0_,
+	        customer0_.cust_level as cust_lev3_0_0_,
+	        customer0_.cust_linkman as cust_lin4_0_0_,
+	        customer0_.cust_phone as cust_pho5_0_0_,
+	        customer0_.cust_mobile as cust_mob6_0_0_,
+	        customer0_.cust_address as cust_add7_0_0_ 
+	    from
+	        customer customer0_ 
+	    where
+	        customer0_.cust_id=?
+	        
+		60
+		------------------------
+		派大星
+		
+		
+		说明：使用get方法不可以延迟加载，当需要输出id时，就从数据库中查询，输出sql语句
+
+
+
+类级别的延迟加载：
+
+	代码：
+		Customer customer = session.load(Customer.class, 60L);
+		System.out.println(customer.getCust_id());
+
+		System.out.println("------------------------");
+
+		System.out.println(customer.getCust_name());
+		
+	日志：
+		60
+		------------------------
+		Hibernate: 
+		    select
+		        customer0_.cust_id as cust_id1_0_0_,
+		        customer0_.cust_name as cust_nam2_0_0_,
+		        customer0_.cust_level as cust_lev3_0_0_,
+		        customer0_.cust_linkman as cust_lin4_0_0_,
+		        customer0_.cust_phone as cust_pho5_0_0_,
+		        customer0_.cust_mobile as cust_mob6_0_0_,
+		        customer0_.cust_address as cust_add7_0_0_ 
+		    from
+		        customer customer0_ 
+		    where
+		        customer0_.cust_id=?
+		派大星
+		
+		
+		说明：当执行session.load(Customer.class, 60L)时，Customer类已经和Session建立关联，
+		在内存当中已经有了要查询的Customer的id，所以，在输出System.out.println(customer.getCust_id())时，
+		不会在控制台打印sql语句，当输出System.out.println(customer.getCust_name())时，由于内存中没有
+		customer的name属性，所以，会从数据库中查询，会输出sql语句，这就是类级别的延迟加载
+		
+		
+		可以配置不使用类级别的延迟加载,在映射配置文件的class中配置:<class name="com.zhiyou.bean.Customer" table="customer" lazy="false">
+		即可不使用
+		
+		
+		
+关联级别的延迟加载：
+	
+	代码：
+		Customer customer = session.get(Customer.class, 60L);
+		System.out.println(customer.getCust_id());
+
+		System.out.println("------------------------");
+
+		System.out.println(customer.getLinkMans().size());
+	
+	日志：
+	    select
+        customer0_.cust_id as cust_id1_0_0_,
+        customer0_.cust_name as cust_nam2_0_0_,
+        customer0_.cust_level as cust_lev3_0_0_,
+        customer0_.cust_linkman as cust_lin4_0_0_,
+        customer0_.cust_phone as cust_pho5_0_0_,
+        customer0_.cust_mobile as cust_mob6_0_0_,
+        customer0_.cust_address as cust_add7_0_0_ 
+	    from
+	        customer customer0_ 
+	    where
+	        customer0_.cust_id=?
+	        
+		60
+		------------------------
+
+	    select
+	        linkmans0_.lkm_cust_id as lkm_cus10_1_0_,
+	        linkmans0_.lkm_id as lkm_id1_1_0_,
+	        linkmans0_.lkm_id as lkm_id1_1_1_,
+	        linkmans0_.lkm_name as lkm_name2_1_1_,
+	        linkmans0_.lkm_gender as lkm_gend3_1_1_,
+	        linkmans0_.lkm_phone as lkm_phon4_1_1_,
+	        linkmans0_.lkm_mobile as lkm_mobi5_1_1_,
+	        linkmans0_.lkm_email as lkm_emai6_1_1_,
+	        linkmans0_.lkm_qq as lkm_qq7_1_1_,
+	        linkmans0_.lkm_position as lkm_posi8_1_1_,
+	        linkmans0_.lkm_memo as lkm_memo9_1_1_,
+	        linkmans0_.lkm_cust_id as lkm_cus10_1_1_ 
+	    from
+	        linkman linkmans0_ 
+	    where
+	        linkmans0_.lkm_cust_id=?
+		2
+				
+				
+		说明：get方法可以执行关联级别的延迟加载，当用不到linkMan中的信息时，不会执行查询linkman表的sql
+		语句，需要linkman中的信息的时候，才查询linkman的信息
+		
+		
+		
+在set标签中的配置策略（在set标签中配置的lazy属性和在class标签中配置的lazy属性，作用是一样的）
+	
+	fetch：select      默认值，发送查询sql
+		   join       迫切左外连接
+		   subselect  发送一条子查询查询关联对象，需要使用list()方法进行测试
+		   
+	
+	
+	lazy：   true        默认使用延迟加载
+		  false       不使用延迟加载
+		  extra       极其懒惰,会优化sql语句
+		
+		
+	在开发中基本上使用的都是默认值
+	
+	当配置lazy="true"/lazy="false" fetch = "join"时，
+	这时延迟不起作用，因为采用的是外连接查询，同时把一端和多端都查询出来了
+		
+	
+	当配置fetch="subselect" lazy="extra"时，代码以及日志信息如下：
+		代码：
+			Query query = session.createQuery("from Customer");
+			List<Customer> customers = query.list();
+			for (Customer customer : customers) {
+				System.out.println(customer.getLinkMans().size());
+			}
+		日志：
+		    select
+		        linkmans0_.lkm_cust_id as lkm_cus10_1_1_,
+		        linkmans0_.lkm_id as lkm_id1_1_1_,
+		        linkmans0_.lkm_id as lkm_id1_1_0_,
+		        linkmans0_.lkm_name as lkm_name2_1_0_,
+		        linkmans0_.lkm_gender as lkm_gend3_1_0_,
+		        linkmans0_.lkm_phone as lkm_phon4_1_0_,
+		        linkmans0_.lkm_mobile as lkm_mobi5_1_0_,
+		        linkmans0_.lkm_email as lkm_emai6_1_0_,
+		        linkmans0_.lkm_qq as lkm_qq7_1_0_,
+		        linkmans0_.lkm_position as lkm_posi8_1_0_,
+		        linkmans0_.lkm_memo as lkm_memo9_1_0_,
+		        linkmans0_.lkm_cust_id as lkm_cus10_1_0_ 
+		    from
+		        linkman linkmans0_ 
+		    where
+		        linkmans0_.lkm_cust_id in (
+		            select
+		                customer0_.cust_id 
+		            from
+		                customer customer0_
+		        )
+		        
+			5
+			4
+			3
+			1
+			2
+			0
+			0
+			0
+			2
+			2
+			2
+			2
+			0
+			2
+			2
+			2
+	
+		如果配置的是fetch="select" lazy="extra"，会执行很多sql语句，使用这种子查询
+		只需执行两条sql语句
+	
+	
+	
+	
+	当配置fetch="select" lazy="extra"时，日志信息如下：
+		
+	    select
+	        customer0_.cust_id as cust_id1_0_0_,
+	        customer0_.cust_name as cust_nam2_0_0_,
+	        customer0_.cust_level as cust_lev3_0_0_,
+	        customer0_.cust_linkman as cust_lin4_0_0_,
+	        customer0_.cust_phone as cust_pho5_0_0_,
+	        customer0_.cust_mobile as cust_mob6_0_0_,
+	        customer0_.cust_address as cust_add7_0_0_ 
+	    from
+	        customer customer0_ 
+	    where
+	        customer0_.cust_id=?
+	        
+		60
+		------------------------
+		Hibernate: 
+		    select
+		        count(lkm_id) 
+		    from
+		        linkman 
+		    where
+		        lkm_cust_id =?
+		2	
+		
+		可以看出，sql语句明显地优化了
+		
+		
+		
+在<many-to-one> 标签上的属性配置策略：
+
+	fetch=select   默认控制sql的格式，发送基本select语句
+		 =join     无效
+		
+	
+	lazy=false   不使用延迟加载
+	    =proxy   由 ‘一端’ 的<set> 标签上的lazy属性值决定	，和 ‘一端’ 上的lazy属性值一致
+		
+		
+		

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:p="http://www.springframework.org/schema/p" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd">
+
+	<context:component-scan base-package="com.shiro.*"></context:component-scan>
+
+	<bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+		<!-- 安全管理器中的属性注入： 1、缓存技术，缓存管理 cacheManager 2、realm：负责获取处理数据的 -->
+		<property name="cacheManager" ref="cacheManager" />
+		<!-- 配置多realm的第一种方式，这样做的唯一目的就是为了数据的安全性，可以从多个realm中比对 数据，在不同的realm中， 使用不同的数据库，不同的加密算法来判断数据是否一致，最后可以通过认证策略来判断数据的正确性 -->
+		<property name="realms">
+			<list>
+				<ref bean="jdbcRealm" />
+				<ref bean="jdbcRealm2" />
+			</list>
+		</property>
+	</bean>
+
+	<!-- 缓存管理 -->
+	<bean id="cacheManager" class="org.apache.shiro.cache.ehcache.EhCacheManager">
+		<property name="cacheManagerConfigFile" value="classpath:ehcache.xml" />
+	</bean>
+
+	<!-- jdbcRealm：负责获取处理数据的 -->
+	<bean id="jdbcRealm" class="com.shiro.test.ShiroRealm">
+		<!-- 进行密码加密 -->
+		<property name="credentialsMatcher">
+			<bean class="org.apache.shiro.authc.credential.HashedCredentialsMatcher">
+				<!-- 选择加密算法：MD5 -->
+				<property name="hashAlgorithmName" value="MD5"></property>
+				<!-- 经过1024次加密 -->
+				<property name="hashIterations" value="1024"></property>
+			</bean>
+		</property>
+	</bean>
+	<!-- jdbcRealm：负责获取处理数据的 -->
+	<bean id="jdbcRealm2" class="com.shiro.test.ShiroRealm2">
+		<!-- 进行密码加密 -->
+		<property name="credentialsMatcher">
+			<bean class="org.apache.shiro.authc.credential.HashedCredentialsMatcher">
+				<!-- 选择加密算法：SHA1 -->
+				<property name="hashAlgorithmName" value="SHA1"></property>
+				<!-- 经过1024次加密 -->
+				<property name="hashIterations" value="1024"></property>
+			</bean>
+		</property>
+	</bean>
+
+	<!-- 必须要有这样的实例，来管理shiro常见的对象 -->
+	<bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor" />
+
+	<!-- 启用shiro注解 -->
+	<bean
+		class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"
+		depends-on="lifecycleBeanPostProcessor" />
+	<bean
+		class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">
+		<property name="securityManager" ref="securityManager" />
+	</bean>
+
+	<!-- 网络方面 -->
+	<bean id="secureRemoteInvocationExecutor"
+		class="org.apache.shiro.spring.remoting.SecureRemoteInvocationExecutor">
+		<property name="securityManager" ref="securityManager" />
+	</bean>
+
+	<bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+		<!-- 安全管理 -->
+		<property name="securityManager" ref="securityManager" />
+		<!-- 起始登录页面 -->
+		<property name="loginUrl" value="/login.jsp" />
+		<!-- 登录成功页面 -->
+		<property name="successUrl" value="/success.jsp" />
+		<!-- 登录失败页面 -->
+		<property name="unauthorizedUrl" value="/error.jsp" />
+		<!-- 代表我们要完成shiro过滤器的具体可以访问的web资源配置 -->
+		<property name="filterChainDefinitions">
+			<!-- 支持Ant风格测试访问admin1,判断是拦截还是允许访问(结果为允许访问，所以，filter为按顺序执行，采取优先匹配原则) -->
+			<!-- anon：不经过认证也可以访问的资源 -->
+			<!-- authc：必须经过认证之后才能访问的资源(如果不经过认证访问定义的资源，会跳转到login.jsp): -->
+			<value>
+
+				/**/admin*.jsp = anon
+				/login = anon
+
+				/**/admin1.jsp =authc
+				/** =
+				authc
+			</value>
+		</property>
+	</bean>
+
+</beans>

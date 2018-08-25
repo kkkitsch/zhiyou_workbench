@@ -1,0 +1,100 @@
+自定义的类型转换器的实现流程：
+
+	String--->User
+	
+	1、写一个类型转换器
+		有三种实现方式：
+		·Converter<S,T> S:原类型  T：目标类型
+		·ConererFactory:
+		·GenericConverter
+		
+	2、注册类型转换器：数据绑定的时候，spingMVC容器自动地调用对象
+		如果要指定多个类型转换器，添加多个属性就好了
+		指定id，class：
+		<bean id="conversionService"
+			class="org.springframework.context.support.ConversionServiceFactoryBean">
+			<property name="converters">
+				<set>
+					<bean class="com.springmvc.converter.StringToUserConverter"></bean>
+				</set>
+			</property>
+		</bean>
+	
+	3、告诉springMVC容器配置了一个类型转换器：
+		<mvc:annotation-driven conversion-service="conversionService" />
+		
+使用数字格式化标注@NumberFormat：
+	1、springMVC配置文件中必须包含：<mvc:annotation-driven />
+	2、@NumberFormat标注实在pojo的属性上面进行标注的
+		含有的属性：----pattern  自定义样式，#来代表任意数字
+				----style    NumberFormat自带的样式，NumberFormat.style
+	3、必须让类型转换器采用的类型是：FormattingConversionServiceFactoryBean
+		·默认springMVC加载的就是：FormattingConversionServiceFactoryBean
+		·如果配置了自定义的类型转换器，配置文件中bean中class为：FormattingConversionServiceFactoryBean
+
+使用日期格式化标注@DateTimeFormat：
+	1、springMVC配置文件中必须包含：<mvc:annotation-driven />
+	2、@DateTimeFormat标注实在pojo的属性上面进行标注的
+		含有的属性：----pattern  自定义样式  yyyy-MM-dd hh-mm-ss
+				----iso      已经定义好的一些样式
+	3、必须让类型转换器采用的类型是：FormattingConversionServiceFactoryBean
+		·默认springMVC加载的就是：FormattingConversionServiceFactoryBean
+		·如果配置了自定义的类型转换器，配置文件中bean中class为：FormattingConversionServiceFactoryBean
+
+
+使用自定义拦截器流程：
+	1、自定义拦截器类
+		实现HandlerInterceptor接口
+		实现接口中的方法：
+			preHandle()
+			postHandle()
+			afterCompletion()
+	2、在springMVC配置文件中配置拦截器
+		<mvc:interceptors>
+			<mvc:interceptor>
+				<mvc:mapping path="/formError" />
+				<bean id="myInterceptor" class="com.springmvc.interceptor.MyInterceptor" />
+			</mvc:interceptor>
+		</mvc:interceptors>
+		
+		如果只在<mvc:interceptors>标签中配置了一个bean，那么此拦截器会拦截所有的请求
+		
+		配置多个拦截器可以在<mvc:interceptors>标签中添加多个子节点
+
+
+
+国际化
+
+	1、在页面当中获取：JSTLView
+		<fmt:message key="国际化资源文件对应的key"></fmt:message>
+		
+	2、在java代码中获取：首先要获取原生的HttpServletRequest请求对象request
+		RequestContext context = new RequestContext(request);
+		String message = context.getMessage("user.name");
+		
+	3、页面中超级链接可以选择的方式	
+		没做出来
+		
+		
+---------------------------------------------
+在业务方法如何获取AJAX发送的请求参数：@RequestBody
+	1、如果ajax发送的是一个简单的JSON,可以通过以往的做法，直接在方法的入参中加入指定类型的数据来绑定
+	
+		例子：
+			ajax中的数据：data : {'name':'tom','age':12},
+			业务方法参数：        @RequestMapping("/testRequestBody")
+						public void testRequestBody(Person person) {
+							System.out.println(person);
+						}
+		
+	2、如果ajax发送的是一个数组，要在业务方法中将参数类型指定为List，并且要加上标注：@RequestBody
+	      同时，ajax在发送请求时，应指定contentType	
+	  
+		  例子：
+		  	ajax中的数据：data : '[{"name":"tom","age":12},{"name":"kkk","age":21}]',
+		  	业务方法参数：        @RequestMapping("/testRequestBody")
+						public void testRequestBody(@RequestBody List<Person> person) {
+							System.out.println(person);
+						}
+						
+在业务方法向AJAX发送发送数据：@ResponseBody				

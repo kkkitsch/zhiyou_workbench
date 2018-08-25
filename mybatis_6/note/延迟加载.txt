@@ -1,0 +1,76 @@
+
+延迟加载的配置：
+
+	延迟加载的全局开关。当开启时，所有关联对象都会延迟加载。 特定关联关系中可通过设置fetchType属性来覆盖该项的开关状态
+	<setting name="lazyLoadingEnabled" value="true" />
+	
+	 当开启时，任何方法的调用都会加载该对象的所有属性。否则，每个属性会按需加载
+	<setting name="aggressiveLazyLoading" value="false" />
+	
+	
+	
+即使在全局配置文件中配置了延迟加载，如果想让某个一sql不使用延迟加载怎么办呢：
+	在嵌套查询中配置：
+		fetchType="lazy" ：表示使用延迟加载；
+		fetchType="eager":立即加载
+
+
+
+
+不配置延迟加载，查询学生信息： 
+
+	java代码：
+		StudentMapper mapper = session.getMapper(StudentMapper.class);
+		Student student = mapper.getStudentClazzByStep(1);
+		if (student != null) {
+			logger.info("查询成功，学生姓名为:" + student.getStudent_name());
+			// logger.info("学生班级信息为:" + student.getClazz());
+		}
+		
+	即使注释了查询clazz的语句，只查询学生的姓名，控制台输出，依然执行了查询clazz的sql：
+		==>  Preparing: select * from student where student_id=? 
+		==> Parameters: 1(Integer)
+		<==    Columns: student_id, student_name, student_age, student_sex, student_info
+		<==        Row: 1, alice, 21, m, good person
+		====>  Preparing: select * from clazz left join clazz_student on clazz.clazz_id=clazz_student.c_id where clazz_student.s_id=? 
+		====> Parameters: 1(Integer)
+		<====    Columns: clazz_id, clazz_name, clazz_info, clazz_buildtime, c_id, s_id
+		<====        Row: 151, 移动互联网151班, 弱小，不堪一击, 2015-09-09, 151, 1
+		<====      Total: 1
+		<==      Total: 1
+		[INFO ] 2018-08-18 16:23:54,901(905) --> [main] com.zhiyou.mybatis.test.MultiTableOperation.test7(MultiTableOperation.java:150): 查询成功，学生姓名为:alice  
+
+
+
+配置延迟加载，查询学生信息：
+
+	java代码：
+		StudentMapper mapper = session.getMapper(StudentMapper.class);
+		Student student = mapper.getStudentClazzByStep(1);
+		if (student != null) {
+			logger.info("查询成功，学生姓名为:" + student.getStudent_name());
+			// logger.info("学生班级信息为:" + student.getClazz());
+		}
+
+	注释了查询clazz的语句，只查询学生的姓名，控制台输出，只执行了查询student的sql：
+		==>  Preparing: select * from student where student_id=? 
+		==> Parameters: 1(Integer)
+		<==    Columns: student_id, student_name, student_age, student_sex, student_info
+		<==        Row: 1, alice, 21, m, good person
+		<==      Total: 1
+		[INFO ] 2018-08-18 16:25:03,676(979) --> [main] com.zhiyou.mybatis.test.MultiTableOperation.test7(MultiTableOperation.java:150): 查询成功，学生姓名为:alice 
+		
+
+
+
+
+
+
+
+
+
+
+
+
+
+

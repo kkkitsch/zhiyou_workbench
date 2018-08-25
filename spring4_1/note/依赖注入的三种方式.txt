@@ -1,0 +1,27 @@
+	
+	
+	依赖注入：依赖于某些方式给 bean的资源进行注入
+		属性注入
+			使用property标签的前提是bean类中有set get方法
+					<property name="name" value="kkk"></property>
+				
+					<property name="type">
+						<value>哈士奇</value>
+					</property>
+					
+		构造器注入
+			按照顺序进行注入
+				<constructor-arg value="沈阳制造厂" index="1" />
+			按照类型进行注入
+				<constructor-arg value="北京汽车" type="java.lang.String" />
+			
+		工厂方法注入:很少使用，不推荐
+		
+		
+	
+	属性注入的细节
+		1、字面值：可用字符串表示的值，可以通过<value>元素标签或value属性进行注入
+		2、基本数据类型及其封装类、String等类型都可以采取字面值注入的方式
+		3、若字面值中包含特殊字符，可以使用<![CDATA[]]>把字面值包裹起来，使用这种方式注入，不能通过value属性，要通过value标签
+		4、bean的引用：一个对象内部 需要用到另外一个对象的时候，可以使用ref标签或者是reg属性来进行属性的注入
+		       内部bean：bean只能使用一次，id无需指定

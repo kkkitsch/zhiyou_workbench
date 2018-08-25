@@ -1,0 +1,120 @@
+﻿
+查询customer表中的一些sql语句：
+
+
+查询customer表中的部分数据
+SELECT customer_id,customer_name,customer_address from customer where customer_sex  LIKE 'w'
+
+查询customer_id大于3的客户
+SELECT customer_id,customer_name,customer_address from customer where customer_id >3
+
+查询customer_id在2到4的客户
+SELECT customer_id,customer_name,customer_address from customer where customer_id BETWEEN 2 AND 4
+
+查询customer_id不在2到4的客户
+SELECT customer_id,customer_name,customer_address from customer where customer_id NOT BETWEEN 2 AND 4
+
+查询用户名为'哈塔'的的信息
+SELECT customer_id,customer_name,customer_address from customer where customer_name LIKE '哈塔'
+
+查询用户名前两个字为'哈塔'的的信息
+SELECT customer_id,customer_name,customer_address from customer where customer_name LIKE '哈塔%'
+
+查询用户名含有'哈塔'的的信息
+SELECT customer_id,customer_name,customer_address from customer where customer_name LIKE '%哈塔%'
+
+查询用户名为三个字并且前两个字为'哈塔'的的信息
+SELECT customer_id,customer_name,customer_address from customer where customer_name LIKE '哈塔_'
+
+查询用户的手机号为null的customer信息
+SELECT customer_id,customer_name,customer_address from customer where customer_mobile is NULL
+
+查询用户的手机号不为null的customer信息
+SELECT customer_id,customer_name,customer_address from customer where customer_mobile is NOT NULL
+
+带 'and' 的多条件查询：查询用户的手机号不为null，并且用户的id>6，并且用户名前两个字为'哈塔'的信息
+SELECT customer_id,customer_name,customer_address from customer where customer_mobile is NOT NULL AND customer_id >6 AND customer_name LIKE '哈塔%'
+
+带 'or' 的多条件查询：查询用户的手机号为null，或者用户的id大于6的用户信息
+SELECT customer_id,customer_name,customer_address from customer where customer_mobile is null or customer_id>6
+
+去重复查询：去除用户名重复的查询
+select DISTINCT customer_name,customer_address from customer 
+
+查询后按照年龄从大到小进行排序
+select DISTINCT customer_name,customer_address ,customer_age from customer ORDER BY customer_age DESC
+
+查询后按照年龄从小到大进行排序
+select DISTINCT customer_name,customer_address ,customer_age from customer ORDER BY customer_age 
+
+
+
+这三种只有一些细微的区别：
+
+与 'GROUP_CONCAT()' 函数，聚合函数一起使用 ，将用户等级一起的人分到一块，并查询相同等级的用户的数量
+select  customer_level,GROUP_CONCAT(customer_name),COUNT(customer_name) from customer GROUP BY customer_level 
+
+与with rollup 一起使用（最后加入一个总和行）
+select  customer_level,GROUP_CONCAT(customer_name),COUNT(customer_name) from customer GROUP BY customer_level WITH ROLLUP
+
+与上者多了一个条件：将用户等级一起的人分到一块，查询相同等级的用户的数量且相同等级的用户的数量小于3的客户
+select  customer_level,GROUP_CONCAT(customer_name),COUNT(customer_name)
+from customer GROUP BY customer_level HAVING COUNT(customer_name) <3
+
+
+
+分页查询：从第三条记录开始，一共六条记录
+select  customer_name,customer_id,customer_mobile from customer LIMIT 2,6
+
+
+
+
+
+
+多表查询：
+
+内连接查询：
+查询用户和订单有联系的用户和订单所有数据：
+select * FROM customer ,`order` where customer.customer_id=`order`.order_cust_id
+
+重要：
+查询用户购买的商品，并计算总价：
+select customer_name,GROUP_CONCAT(order_name),SUM(order_price*order_num) FROM customer ,`order` where customer.customer_id=`order`.order_cust_id GROUP BY customer_name
+
+
+外连接查询（运行一下，看看左外连接和右外连接有什么区别）：
+
+左外连接查询：
+select customer.customer_name,customer.customer_mobile,customer.customer_address,`order`.order_name
+FROM customer LEFT JOIN `order` ON customer.customer_id=`order`.order_cust_id
+
+
+右外连接查询：
+select customer.customer_name,customer.customer_mobile,customer.customer_address,`order`.order_name
+FROM customer RIGHT JOIN `order` ON customer.customer_id=`order`.order_cust_id
+
+
+
+
+
+多条件连接查询：
+select customer.customer_name,customer.customer_mobile,customer.customer_address,`order`.order_name
+FROM customer ,`order` where customer.customer_id=`order`.order_cust_id AND `order`.order_num>1
+
+
+
+纵表转横表
+select Name ,sum(case Course when '语文' then Grade else 0 end) as 语文,
+sum(case Course when '数学' then Grade else 0 end) as 数学,
+sum(case Course when '英语' then Grade else 0 end) as 英语
+from TableA GROUP BY Name 
+
+纵表转横表
+INSERT INTO TableA(Name,Course,Grade)
+select Name,'语文' as 科目,语文 as 成绩
+FROM TableB UNION ALL
+select Name,'数学' as 科目,数学 as 成绩
+FROM TableB UNION ALL
+select Name,'英语' as 科目,英语 as 成绩
+FROM TableB 
+ORDER BY Name,科目,成绩 DESC

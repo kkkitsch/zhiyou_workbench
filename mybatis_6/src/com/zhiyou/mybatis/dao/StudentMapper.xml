@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zhiyou.mybatis.dao.StudentMapper">
+
+	<!-- 使用结果集，嵌套结果 -->
+	<resultMap type="student" id="studentResultMap">
+		<id property="student_id" column="student_id" jdbcType="INTEGER" />
+		<result property="student_name" column="student_name" jdbcType="VARCHAR" />
+		<result property="student_age" column="student_age" jdbcType="VARCHAR" />
+		<result property="student_sex" column="student_sex" jdbcType="VARCHAR" />
+		<result property="student_info" column="student_info" jdbcType="VARCHAR" />
+		<association property="clazz" javaType="com.zhiyou.mybatis.bean.Clazz">
+			<id property="clazz_id" column="clazz_id" jdbcType="INTEGER" />
+			<result property="clazz_name" column="clazz_name" jdbcType="VARCHAR" />
+			<result property="clazz_info" column="clazz_info" jdbcType="VARCHAR" />
+			<result property="clazz_buildtime" column="clazz_buildtime"
+				jdbcType="DATE" />
+		</association>
+	</resultMap>
+
+
+
+
+
+	<!-- 使用结果集，嵌套查询 -->
+	<resultMap type="student" id="studentResultMapStep">
+		<id property="student_id" column="student_id" jdbcType="INTEGER" />
+		<result property="student_name" column="student_name" jdbcType="VARCHAR" />
+		<result property="student_age" column="student_age" jdbcType="VARCHAR" />
+		<result property="student_sex" column="student_sex" jdbcType="VARCHAR" />
+		<result property="student_info" column="student_info" jdbcType="VARCHAR" />
+		
+		<association property="clazz" column="{prop1=student_id}"
+			select="com.zhiyou.mybatis.dao.ClazzMapper.getClazzById">
+		</association>
+		
+	</resultMap>
+
+
+
+
+	<!-- 嵌套查询学生信息 -->
+	<select id="getStudentClazzByStep" resultMap="studentResultMapStep">
+		select * from
+		student where student_id=#{id}
+	</select>
+
+
+
+
+
+	<!-- 根据id查询student，不涉及clazz的查询，返回类型为结果集 -->
+	<select id="getStudentById" parameterType="_int" resultMap="studentResultMap"
+		databaseId="mysql">
+		select * from student where student_id=#{id}
+	</select>
+
+
+
+
+
+
+
+
+
+
+	<!-- 根据id查询student，涉及clazz的查询，返回类型为结果集 -->
+	<select id="getStudentWithClass" parameterType="_int"
+		resultMap="studentResultMap">
+		select student.*,clazz.*
+		from clazz
+		left join clazz_student on
+		clazz.clazz_id=clazz_student.c_id
+		left join
+		student on
+		clazz_student.s_id=student.student_id
+		where
+		student.student_id=#{id}
+	</select>
+
+
+
+
+
+
+
+
+
+
+
+	<!-- 根据id查询student，涉及clazz的查询，返回类型为bean对象 -->
+	<select id="getStudentWithClass1" parameterType="_int"
+		resultType="STUDENT">
+		select student.*,clazz.*
+		from clazz
+		left join clazz_student
+		on
+		clazz.clazz_id=clazz_student.c_id
+		left join
+		student on
+		clazz_student.s_id=student.student_id
+		where
+		student.student_id=#{id}
+	</select>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	<!-- clazz结果集，嵌套结果 -->
+	<resultMap type="clazz" id="clazzResultMap">
+		<id property="clazz_id" column="clazz_id" jdbcType="INTEGER" />
+		<result property="clazz_name" column="clazz_name" jdbcType="VARCHAR" />
+		<result property="clazz_info" column="clazz_info" jdbcType="VARCHAR" />
+		<result property="clazz_buildtime" column="clazz_buildtime"
+			jdbcType="DATE" />
+		<collection property="students" ofType="com.zhiyou.mybatis.bean.Student">
+			<id property="student_id" column="student_id" jdbcType="INTEGER" />
+			<result property="student_name" column="student_name"
+				jdbcType="VARCHAR" />
+			<result property="student_age" column="student_age" jdbcType="VARCHAR" />
+			<result property="student_sex" column="student_sex" jdbcType="VARCHAR" />
+			<result property="student_info" column="student_info"
+				jdbcType="VARCHAR" />
+		</collection>
+	</resultMap>
+
+
+
+
+
+
+
+
+	<!-- 根据id查询clazz，涉及student的查询，返回类型为结果集 -->
+	<select id="getClazzById" parameterType="_int" resultMap="clazzResultMap">
+		select
+		* from clazz left join clazz_student
+		on
+		clazz.clazz_id=clazz_student.c_id
+		left join student on
+		student.student_id=clazz_student.s_id
+		where clazz.clazz_id=#{id}
+	</select>
+
+
+
+	<select id="getClazzById1" parameterType="_int" resultType="clazz">
+		select * from clazz where clazz_id=#{id}
+	</select>
+
+
+
+
+
+
+	<select id="getStudentByClazzId" parameterType="_int"
+		resultMap="studentResultMap">
+		select * from student left join clazz_student on
+		student.student_id=clazz_student.s_id
+		where clazz_student.c_id=#{id}
+	</select>
+
+
+
+
+</mapper>

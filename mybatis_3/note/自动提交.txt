@@ -1,0 +1,6 @@
+  
+openSession()方法可以设置为true即可自动提交：  
+  
+  SqlSession openSession();
+
+  SqlSession openSession(boolean autoCommit);

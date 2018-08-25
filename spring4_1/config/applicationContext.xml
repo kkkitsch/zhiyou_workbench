@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+
+
+	<!-- 属性的注入及引用bean -->
+	<bean id="person_01" class="com.spring.beans.Person">
+		<property name="name" value="kkk" />
+		<property name="age" value="21" />
+
+		<!-- 引用bean的第一种方式 -->
+		<property name="car" ref="car_01" />
+
+		<!-- 引用bean的第二种方式 -->
+		<!-- <property name="car"> <ref bean="car_01" /> </property> -->
+
+	</bean>
+
+
+
+	<!-- 如果引用的bean只使用一次，那可以放在里面，而且bean的id可以省略 -->
+	<bean id="person_02" class="com.spring.beans.Person">
+		<property name="name" value="kitsch" />
+		<property name="age" value="22" />
+		<property name="car">
+			<bean class="com.spring.beans.Car">
+				<constructor-arg value="和田制造厂" index="1" />
+				<constructor-arg index="0">
+					<value><![CDATA[<宝马008>]]></value>
+				</constructor-arg>
+				<constructor-arg value="400000.23D" index="2" />
+			</bean>
+		</property>
+	</bean>
+
+
+
+	<!-- 
+		为属性注入null值的两种方式：
+		1、直接不写需要注入null值的标签，隐式地注入null值
+		2、给出null标签，显式地注入null值
+	 -->
+	<bean id="person_03" class="com.spring.beans.Person">
+		<property name="name" value="kkk" />
+		<property name="age" value="21" />
+		<property name="car">
+			<null></null>
+		</property>
+	</bean>
+
+
+
+	<!-- 级联属性：person.car.type -->
+	<bean id="car_05" class="com.spring.beans.Car"></bean>
+	<bean id="person_05" class="com.spring.beans.Person">
+		<property name="name" value="kkk" />
+		<property name="age" value="21" />
+		<property name="car" ref="car_05"></property>
+		<property name="car.price" value="666666.66D"></property>
+		<property name="car.type" value="奔驰s320"></property>
+	</bean>
+
+
+
+	<!--id的值必须唯一 -->
+	<!--使用property标签进行属性注入 -->
+	<bean id="dog_01" class="com.spring.beans.Dog">
+		<property name="type">
+			<value>哈士奇</value>
+		</property>
+	</bean>
+
+
+
+	<!-- 使用构造器 进行属性注入 -->
+	<bean id="dog_02" class="com.spring.beans.Dog">
+		<constructor-arg value="藏獒" />
+	</bean>
+
+
+
+	<!-- 如果有相同的数据类型，则按照相同类型的属性的顺序注入 ，不推荐这种方式 -->
+	<bean id="car_02" class="com.spring.beans.Car">
+		<constructor-arg value="北京汽车" type="java.lang.String" />
+		<constructor-arg value="北汽重工" type="java.lang.String" />
+		<constructor-arg value="123456.78D" type="double" />
+	</bean>
+
+
+
+	<!-- index 为bean中属性的索引，从0开始，推荐这种方式 -->
+	<bean id="car_01" class="com.spring.beans.Car">
+		<constructor-arg value="沈阳制造厂" index="1" />
+		<constructor-arg index="0">
+			<value><![CDATA[<宝马007>]]></value>
+		</constructor-arg>
+		<constructor-arg value="600000.23D" index="2" />
+	</bean>
+
+
+
+	<!-- 不指定id值的命名策略：默认是当前类的全路径，即把class后面的内容当成默认的id值 -->
+	<bean class="com.spring.beans.Dog">
+		<property name="type" value="中华田园犬" />
+	</bean>
+	<bean class="com.spring.beans.Dog">
+		<property name="type" value="日本秋田犬" />
+	</bean>
+
+
+
+</beans>

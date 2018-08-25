@@ -1,0 +1,61 @@
+	
+	
+	
+		集合属性：
+		在Spring中可以通过一组内置的xml标签（例如<list>,<set>,<map>）来配置集合的属性
+		
+		数组、List集合使用的标签是<list>
+		Set集合使用的标签为<set>，定义元素的方法和List一样
+		
+		Map集合使用的标签为<map>
+			<map>标签使用多个<entry>作为字标签，每个字标签包含一个键值对
+			必须在 <key>标签里定义 键
+			因为键和值的类型没有限制，所以可以 自由地为它们指定<value>,<ref>,<bean>,<null>元素
+			可以将Map的键和值作为<entry>的属性定义，简单常量使用key和value来定义，Bean的引用通过key-ref和value-ref属性定义
+			
+		外部<util:list>的使用：
+			必须指明命名空间：NameSpaces-->选择configure namespaces中的最后一项util-->划对勾
+			必须指明id
+			
+			
+			
+			
+			
+			
+		p命名空间的使用：
+			NameSpaces-->选择configure namespaces中的p-->划对勾
+			<bean id="person_03" class="com.spring.beans.Person" p:name="tom"
+			p:age="22" p:cars-ref="listCar">
+			</bean>
+			
+			
+			
+			
+		配置文件中bean的关系：
+		
+			继承：继承父bean的内容，如果子bean有新的属性的话，会覆盖掉父bean的属性
+				产生的原因：简化开发
+				
+					抽象bean：
+					如果很多bean有一些相同的属性，那么可以定义一个抽象bean来供他们继承，抽象bean是专门用来被继承的
+					<bean id="abstractPerson" abstract="true" class="com.spring.beans.Person"
+					p:name="steven" p:age="21"></bean>
+					抽象bean中并不是所有的属性都会被继承，比如autowire和abstract
+			
+			依赖：
+				Spring允许用户通过depends-on属性设定Bean前置依赖的Bean，前置依赖的bean会在本Bean
+				实例化之前创建好
+				
+				如果前置依赖于多个bean，可以通过逗号，空格的方式配置bean的名称
+			
+			
+			
+			
+			
+		bean的作用域：
+			类别				说明
+			singleton		默认作用域，在SpringIoC容器中仅存在一个bean实例，bean以单例的方式存在
+			prototype		每次获取bean的时候都会返回一个新的实例
+			request			每次HTTP请求都会创建一个新的bean，该作用域仅适用于WebApplicationContext环境
+			session			同一个HTTPSession共享一个bean，不同的HTTOSession使用不同的bean，该作用域仅适用于WebApplicationContext环境
+			

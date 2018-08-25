@@ -1,0 +1,18 @@
+
+	两个内置参数，一般用在表达式当中：
+	
+		_parameter:
+			如果传给映射文件的是单个参数：_parameter就代表这个参数
+			如果传给映射文件的是多个参数，那么这多个参数会被封装成map：_parameter就代表这个map
+			
+		_databaseeId:
+			如果在全局配置文件中配置了databaseIdProvider标签，_databaseId就是代表当前数据库的别名
+					
+					
+	bind标签：
+		bind 元素可以从 OGNL 表达式中创建一个变量并将其绑定到上下文。比如：
+		<select id="selectBlogsLike" resultType="Blog">
+		  <bind name="pattern" value="'%' + _parameter.getTitle() + '%'" />
+		  SELECT * FROM BLOG
+		  WHERE title LIKE #{pattern}
+		</select>

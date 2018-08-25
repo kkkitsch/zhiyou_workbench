@@ -1,0 +1,9 @@
+
+
+向数据库中添加了一条数据，在获取自增id的时候，获取的为null值 ，有两种解决方法：
+
+	一、在映射配置文件上加上：useGeneratedKeys="true" keyProperty="id"
+	
+	二、在全局配置文件中配置：useGeneratedKeys="true" ，原本的配置文件只需配置：keyProperty="id"
+	
+	keyProperty="id" 即表示为 将数据库中添加的数据的自增id 传给实体类bean中的属性：id

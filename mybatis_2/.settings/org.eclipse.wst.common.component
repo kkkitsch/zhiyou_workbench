@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
+    <wb-module deploy-name="Mybatis_02">
+        <wb-resource deploy-path="/" source-path="/WebContent" tag="defaultRootSource"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src"/>
+        <dependent-module archiveName="log4j-1.2.17.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/C:/Users/KKKITSCH/Desktop/zy/jar/mybatis-3.2.7/lib/log4j-1.2.17.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="javassist-3.17.1-GA.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/C:/Users/KKKITSCH/Desktop/zy/jar/mybatis-3.2.7/lib/javassist-3.17.1-GA.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="slf4j-api-1.7.5.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/C:/Users/KKKITSCH/Desktop/zy/jar/mybatis-3.2.7/lib/slf4j-api-1.7.5.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="mysql-connector-java-5.1.40-bin.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/C:/Users/KKKITSCH/Desktop/zy/jar/MySQL驱动 for java/mysql-connector-java-5.1.40-bin.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="cglib-2.2.2.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/C:/Users/KKKITSCH/Desktop/zy/jar/mybatis-3.2.7/lib/cglib-2.2.2.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="slf4j-log4j12-1.7.5.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/C:/Users/KKKITSCH/Desktop/zy/jar/mybatis-3.2.7/lib/slf4j-log4j12-1.7.5.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="asm-3.3.1.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/C:/Users/KKKITSCH/Desktop/zy/jar/mybatis-3.2.7/lib/asm-3.3.1.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="mybatis-3.2.7.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/C:/Users/KKKITSCH/Desktop/zy/jar/mybatis-3.2.7/mybatis-3.2.7.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="log4j-api-2.0-rc1.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/C:/Users/KKKITSCH/Desktop/zy/jar/mybatis-3.2.7/lib/log4j-api-2.0-rc1.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="commons-logging-1.1.1.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/C:/Users/KKKITSCH/Desktop/zy/jar/mybatis-3.2.7/lib/commons-logging-1.1.1.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="log4j-core-2.0-rc1.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/C:/Users/KKKITSCH/Desktop/zy/jar/mybatis-3.2.7/lib/log4j-core-2.0-rc1.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <property name="context-root" value="Mybatis_02"/>
+        <property name="java-output-path" value="/Mybatis_02/build/classes"/>
+    </wb-module>
+</project-modules>

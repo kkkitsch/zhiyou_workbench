@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://java.sun.com/xml/ns/javaee"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+	id="WebApp_ID" version="3.0">
+	<display-name>JSPAndServletDemo</display-name>
+	<welcome-file-list>
+		<welcome-file>index.jsp</welcome-file>
+	</welcome-file-list>
+	<session-config>
+		<session-timeout>10</session-timeout>
+	</session-config>
+	<context-param>
+		<param-name>contextParam1</param-name>
+		<param-value> ServletContext value1</param-value>
+	</context-param>
+	<context-param>
+		<param-name>contextParam2</param-name>
+		<param-value> ServletContext value2</param-value>
+	</context-param>
+	<filter>
+		<filter-name>LogFilter</filter-name>
+		<filter-class>com.zhiyou.filter.LogFilter</filter-class>
+		<init-param>
+			<param-name>Site</param-name>
+			<param-value>菜鸟教程</param-value>
+		</init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>LogFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+	<filter>
+		<filter-name>AogFilter</filter-name>
+		<filter-class>com.zhiyou.filter.AogFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>AogFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+	<servlet>
+		<servlet-name>StartServlet</servlet-name>
+		<servlet-class>com.zhiyou.servlet.StartServlet</servlet-class>
+		<init-param>
+			<param-name>initParam1</param-name>
+			<param-value>value1</param-value>
+		</init-param>
+		<init-param>
+			<param-name>initParam2</param-name>
+			<param-value>value2</param-value>
+		</init-param>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>StartServlet</servlet-name>
+		<url-pattern>/StartServlet</url-pattern>
+	</servlet-mapping>
+</web-app>

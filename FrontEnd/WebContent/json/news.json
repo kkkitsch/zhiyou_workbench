@@ -1,0 +1,26 @@
+[
+	{
+		"name": "kkkitsch",
+		"age": 21,
+		"address":{
+			"city": "郑州",
+			"street": "中原路"
+		}
+	},
+	{
+		"name": "tomcluse",
+		"age": 21,
+		"address":{
+			"city": "周口",
+			"street": "华佗路"
+		}
+	},
+	{
+		"name": "Steven",
+		"age": 21,
+		"address":{
+			"city": "泰安",
+			"street": "泰山路"
+		}
+	}
+]

@@ -1,0 +1,31 @@
+
+Vue实例：
+
+	var vm = new Vue({
+		el : '#vue_det',
+		data : {
+			site : "菜鸟教程",
+			url : "www.runoob.com",
+			alexa : "10000"
+		},
+		methods : {
+			details : function() {
+				return this.site + "---学的不仅仅是技术，更是梦想！";
+			}
+		}
+	});
+	
+	可以看到在 Vue 构造器中有一个el 参数，它是 DOM 元素中的 id。在上面实例中 id 
+	这意味着我们接下来的改动全部在以上指定的 div 内，div 外部不受影响。
+	
+	
+	data 用于定义属性，实例中有三个属性分别为：site、url、alexa
+	data 的名称不可修改，在访问data中属性值的时候，不需要加上data的名称
+	
+	
+	methods 用于定义的函数，可以通过 return 来返回函数值，访问methods中的方法的时候，
+	不需要加上 methods
+	
+	
+	{{ }} 用于输出对象属性和函数返回值
+	

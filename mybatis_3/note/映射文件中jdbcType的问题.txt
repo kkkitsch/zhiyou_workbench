@@ -1,0 +1,17 @@
+
+
+jdbcType通常需要在某种特定的条件下被设置：
+		在我们实体类bean数据为null的时候，有些数据库可能不能识别mybatis对null的默认处理。
+		比如Oracle会报错：JdbcType OTHER：无效的类型；
+		因为mybatis对所有的null都映射的是原生Jdbc的OTHER类型，oracle不支持这种类型的数据，不能正确处理;
+		
+		默认全局配置中：jdbcTypeForNull=OTHER；oracle不支持
+		
+		解决方案：
+		
+		0、在结果集中使用jdbcType属性
+		
+		1、在传入制定参数的时候指定jdbcType：  #{email,jdbcType=OTHER};
+		
+		2、在全局文件中配置：jdbcTypeForNull=NULL
+			<setting name="jdbcTypeForNull" value="NULL"/>
